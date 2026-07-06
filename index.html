@@ -8,8 +8,8 @@
   section in the script below. Picks are per-browser only; use Export/Import
   (JSON) to back up or move them.
 
-  Live lookups (Wikipedia + optional OMDb) are used for search suggestions,
-  "Surprise me", and posters. These need a real network-connected browser tab —
+  Live lookups (Wikipedia + optional OMDb) are used for search suggestions and
+  posters. These need a real network-connected browser tab —
   they will not work inside a sandboxed preview that blocks outbound requests.
 -->
 <!DOCTYPE html>
@@ -18,6 +18,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CINEMAP — a film for every country</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<meta name="description" content="Build your personal movie map: pick one film to represent every country in the world, star your favorites, and fill in the whole map.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CINEMAP — a film for every country">
+<meta property="og:description" content="Build your personal movie map: pick one film to represent every country in the world, star your favorites, and fill in the whole map.">
+<meta property="og:image" content="https://daniilique.github.io/cinemap/og-image.png">
+<meta property="og:url" content="https://daniilique.github.io/cinemap/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CINEMAP — a film for every country">
+<meta name="twitter:description" content="Build your personal movie map: pick one film to represent every country in the world, star your favorites, and fill in the whole map.">
+<meta name="twitter:image" content="https://daniilique.github.io/cinemap/og-image.png">
 <style>
   /* ===================== THEME VARIABLES (light theme = default) ===================== */
   :root {
@@ -242,6 +253,22 @@
   }
   .modal-overlay.open .modal-card { transform: none; }
 
+  /* --- First-time welcome popup --- */
+  .welcome-card {
+    width: min(94vw, 440px); max-height: 90vh; overflow-y: auto;
+    background: var(--surface); border: none; padding: 34px 30px 30px; text-align: center;
+  }
+  .welcome-flag { font-size: 40px; margin-bottom: 10px; }
+  .welcome-title {
+    font-family: 'Arial Black', 'Haettenschweiler', 'Franklin Gothic Heavy', Impact, sans-serif;
+    font-weight: 900; text-transform: uppercase; font-size: 32px; letter-spacing: -0.02em;
+    display: inline-block; transform: skewX(-9deg); margin: 0 0 18px; color: var(--cream);
+    text-shadow: 3px 3px 0 var(--gold), 3px 3px 12px rgba(196,25,45,0.7);
+  }
+  .welcome-title em { font-style: normal; color: var(--gold); text-shadow: 3px 3px 0 #000000, 3px 3px 12px rgba(196,25,45,0.7); }
+  .welcome-text { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0 0 14px; text-align: left; }
+  .welcome-btn { width: 100%; margin-top: 8px; }
+
   .modal-head {
     position: sticky; top: 0; z-index: 5; background: var(--surface);
     padding: 30px 34px 14px; margin-bottom: 0;
@@ -274,7 +301,7 @@
   .meta-line { font-size: 12.5px; color: var(--muted); text-align:center; margin-bottom: 6px; }
   .empty-msg { color: var(--muted); font-size: 13px; line-height:1.6; text-align:center; margin: 6px 0 4px; }
 
-  /* --- Edit/Remove/Add-film buttons (view mode) --- */
+  /* --- Add-film button (view mode) --- */
   .btn-row { display:flex; gap:2px; margin-top: 16px; }
   .btn-row button {
     flex:1; font-family: var(--font-mono); font-size: 11px; letter-spacing:.1em; text-transform:uppercase; font-weight: 600;
@@ -282,10 +309,33 @@
   }
   .btn-primary { background: var(--gold); color:var(--cream); border:none; }
   .btn-primary:hover { background: var(--gold-dim); }
-  .btn-secondary { background: var(--surface-2); color: var(--muted); border:none; }
-  .btn-secondary:hover { color: var(--cream); }
-  .btn-danger { background: var(--surface-2); color: var(--velvet); border:none; }
-  .btn-danger:hover { color: var(--cream); background: var(--velvet); }
+
+  /* --- Per-country movie list: multiple films, one starred as the favorite --- */
+  .movie-list-label { font-size: 10.5px; color: var(--muted); text-align:center; margin: 16px 0 8px; }
+  .movie-list { display:flex; flex-direction:column; gap: 2px; margin-top: 6px; }
+  .movie-row { display:flex; align-items:center; gap:10px; padding: 8px 10px; background: var(--surface-2); cursor:pointer; }
+  .movie-row:hover { background: var(--map-hover); }
+  .movie-row-thumb { width:32px; height:45px; object-fit:cover; background: var(--surface); flex-shrink:0; }
+  .movie-row-text { flex:1; min-width:0; }
+  .movie-row-title { font-size: 12.5px; color: var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .movie-row-meta { font-size: 10.5px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .star-btn {
+    background: transparent; border: none; color: var(--line); font-size: 17px; cursor: pointer;
+    width: 28px; height: 28px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  }
+  .star-btn.active { color: var(--gold); }
+  .star-btn:hover { color: var(--gold-dim); }
+  .row-remove {
+    background: transparent; border: none; color: var(--muted); font-size: 14px; cursor: pointer;
+    width: 26px; height: 26px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  }
+  .row-remove:hover { color: var(--velvet); }
+  .row-remove-full {
+    width: 100%; background: transparent; border: none; color: var(--velvet);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing:.08em; text-transform:uppercase; font-weight: 600;
+    padding: 10px; cursor: pointer; margin-top: 2px;
+  }
+  .row-remove-full:hover { color: var(--cream); background: var(--velvet); }
 
   /* ---------- Add / edit form: single Google-style field with autocomplete dropdown ---------- */
   /* ===================== ADD/EDIT FORM: single search field + suggestions ===================== */
@@ -325,7 +375,6 @@
     display:none; font-size: 12.5px; color: #ffffff; text-align:center;
     margin: 2px 0 0; padding: 9px 12px; background: var(--gold); font-weight: 600; letter-spacing: .01em;
   }
-  .fetch-status { font-size: 10.5px; color: var(--muted); text-align:center; min-height: 13px; margin: -4px 0 0; }
   .form-actions { display:flex; gap:2px; margin-top: 2px; }
   .form-actions button { flex:1; font-family: var(--font-mono); font-size: 11px; letter-spacing:.1em; text-transform:uppercase; font-weight: 600; padding: 12px; cursor:pointer; }
   .form-actions .save { background: var(--gold); color:var(--cream); border:none; }
@@ -355,7 +404,7 @@
       <span class="switch-icon switch-icon-dark">Noir</span>
     </button>
     <h1>Cine<em>map</em></h1>
-    <p class="sub">A film for every country in the world — build your personal movie map, one country at a time. Search a title or hit Surprise Me and the poster, year, and director fill in automatically. Red means it already has one.</p>
+    <p class="sub">A film for every country in the world — build your personal movie map, one country at a time. Add as many films as you want per country, then star your favorite to show it on the map and list. Red means it already has one.</p>
     <div class="search-wrap">
       <input id="search" type="text" placeholder="Find a country by name…" autocomplete="off" list="country-list">
       <button type="button" id="search-clear" class="search-clear" onclick="clearSearch()" style="display:none;" title="Clear search">×</button>
@@ -371,6 +420,7 @@
           <path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
         </svg>
       </button>
+      <button type="button" class="icon-btn" onclick="document.getElementById('welcome-overlay').classList.add('open')" title="What is this?">?</button>
     </div>
   </header>
 
@@ -789,12 +839,24 @@
 
   <footer>
     <p class="key-row" style="margin: 0;">IMDb data via <a href="https://www.omdbapi.com/" target="_blank" rel="noopener">OMDb</a> — <span id="key-status">checking…</span> · <button type="button" class="key-btn" onclick="promptForOmdbKey()">Set free API key</button></p>
+    <!-- Replace the href below with your Buy Me a Coffee / Ko-fi / PayPal.me link once you've picked one -->
+    <p class="key-row" style="margin: 4px 0 0;"><a href="#DONATE_LINK_PLACEHOLDER" target="_blank" rel="noopener">☕ Support this project</a></p>
   </footer>
 
 </div>
 
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal()">
   <div class="modal-card" id="modal-card"></div>
+</div>
+
+<div class="modal-overlay" id="welcome-overlay" onclick="if(event.target===this) dismissWelcome()">
+  <div class="welcome-card">
+    <div class="welcome-flag">🗺️</div>
+    <div class="welcome-title">Cine<em>map</em></div>
+    <p class="welcome-text">You know those scratch-off travel maps people use to mark every country they've visited? This is that — but for movies.</p>
+    <p class="welcome-text">Tap any country, add a film to represent it, star your favorite if you add more than one, and fill in your own map of world cinema — one country at a time.</p>
+    <button type="button" class="btn-primary welcome-btn" onclick="dismissWelcome()">Got it — let's explore</button>
+  </div>
 </div>
 
 <script>
@@ -938,15 +1000,6 @@ async function omdbFetchByImdbId(imdbID, key) {
   return data;
 }
 
-async function omdbFetchByTitle(title, key) {
-  const url = 'https://www.omdbapi.com/?apikey=' + encodeURIComponent(key) + '&t=' + encodeURIComponent(title) + '&plot=short';
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('OMDb request failed (' + res.status + ')');
-  const data = await res.json();
-  if (data.Response === 'False') throw new Error(data.Error || 'Not found');
-  return data;
-}
-
 async function omdbDetailToResult(detail, embedPoster) {
   const rawPoster = (detail.Poster && detail.Poster !== 'N/A') ? detail.Poster : '';
   const posterUrl = embedPoster ? await posterDataUrl(rawPoster) : rawPoster;
@@ -1080,50 +1133,6 @@ async function searchFilmSuggestions(query, countryName) {
   return settled.filter(s => s.status === 'fulfilled' && s.value).map(s => s.value).slice(0, 4);
 }
 
-// Picks one real film actually associated with the given country (via Wikipedia search),
-// then enriches it with IMDb data if an OMDb key is set. Used by the "Surprise me" button.
-let lastSurpriseTitle = null;
-
-async function suggestRandomFilm(countryName) {
-  const hits = await wikiSearch(countryName + ' film', 12);
-  if (!hits.length) throw new Error('No suggestions found for ' + countryName);
-
-  // Check which candidates actually look like film pages before picking randomly —
-  // otherwise a stray match (a city, a military unit, etc.) could get picked.
-  const settled = await Promise.allSettled(hits.map(h => wikiSummary(h.title)));
-  const filmCandidates = hits
-    .map((h, i) => ({ hit: h, summary: settled[i].status === 'fulfilled' ? settled[i].value : null }))
-    .filter(c => c.summary && looksLikeFilmPage(c.summary));
-  const pool = filmCandidates.length ? filmCandidates : hits.map((h, i) => ({
-    hit: h, summary: settled[i].status === 'fulfilled' ? settled[i].value : null
-  }));
-
-  // The search results are deterministic for a given country, so without this, rerolling
-  // could easily land on the exact same title again — especially for countries with only
-  // a handful of real candidates. Exclude whatever we just showed, when there's an alternative.
-  let candidates = pool;
-  if (lastSurpriseTitle && pool.length > 1) {
-    const filtered = pool.filter(c => c.hit.title !== lastSurpriseTitle);
-    if (filtered.length) candidates = filtered;
-  }
-
-  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-  lastSurpriseTitle = chosen.hit.title;
-  const cleanTitle = chosen.hit.title.replace(/\s*\(.*film.*\)$/i, '');
-
-  const key = await getOmdbKey();
-  if (key) {
-    try {
-      const detail = await omdbFetchByTitle(cleanTitle, key);
-      return await omdbDetailToResult(detail, true);
-    } catch (e) {
-      console.warn('OMDb had no match for the random pick, falling back to Wikipedia', e);
-    }
-  }
-  const summary = chosen.summary || await wikiSummary(chosen.hit.title);
-  return wikiSummaryToResult(chosen.hit.title, summary, true);
-}
-
 /* ---------------- Helpers ---------------- */
 
 function flagEmoji(code) {
@@ -1133,13 +1142,59 @@ function flagEmoji(code) {
   catch (e) { return '🎬'; }
 }
 
+// ---------------- Multi-movie-per-country data model ----------------
+// overrides[code] = { movies: [{id, title, year, director, posterUrl}, ...], favoriteId }
+// getMovie(code) is kept as an alias for "the favorite" so the map fill, list-view tiles,
+// poster wall export, and duplicate check — all written before multi-movie support existed —
+// keep working unchanged; they only ever cared about "the one film" for a country.
+
+function makeMovieId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// Accepts either the new {movies, favoriteId} shape, or a legacy single-movie object
+// (from picks saved before this feature existed) and returns a clean {movies, favoriteId}.
+function normalizeCountryData(raw) {
+  if (!raw) return null;
+  let movies;
+  if (Array.isArray(raw.movies)) movies = raw.movies;
+  else if (raw.title) movies = [raw]; // legacy single-movie shape
+  else return null;
+
+  movies = movies
+    .filter(m => m && m.title)
+    .map(m => ({
+      id: m.id || makeMovieId(),
+      title: m.title,
+      year: m.year || '',
+      director: m.director || '',
+      posterUrl: m.posterUrl || ''
+    }));
+  if (!movies.length) return null;
+
+  let favoriteId = raw.favoriteId;
+  if (!movies.some(m => m.id === favoriteId)) favoriteId = movies[0].id;
+  return { movies, favoriteId };
+}
+
+function getMovies(code) {
+  const data = overrides[code];
+  return data ? data.movies : [];
+}
+
+function getFavoriteMovie(code) {
+  const data = overrides[code];
+  if (!data || !data.movies.length) return null;
+  return data.movies.find(m => m.id === data.favoriteId) || data.movies[0];
+}
+
 function getMovie(code) {
   if (removed[code]) return null;
-  if (overrides[code]) return overrides[code];
-  return null;
+  return getFavoriteMovie(code);
 }
 
 let currentView = 'map';
+
 
 function paintMap() {
   const svg = document.getElementById('map-svg');
@@ -1252,39 +1307,57 @@ function modalHeader(code, extraHtml) {
 function renderView(code) {
   const card = document.getElementById('modal-card');
   const name = COUNTRY_NAMES[code] || code;
-  const movie = getMovie(code);
+  const movies = getMovies(code);
+  const data = overrides[code];
+  const fav = getFavoriteMovie(code);
 
   let html = modalHeader(code);
   html += '<div class="modal-body">';
   html += '<hr>';
 
-  if (movie) {
-    if (movie.posterUrl) {
-      html += '<img class="poster-display" src="' + escapeAttr(movie.posterUrl) + '" alt="' + escapeAttr(movie.title) + '" onerror="this.outerHTML=\'<div class=&quot;poster-placeholder&quot;>🎬</div>\'">';
+  if (!movies.length) {
+    html += '<div class="poster-placeholder">🎬</div>';
+    html += '<p class="empty-msg">No film added yet for ' + escapeHtml(name) + '.</p>';
+    html += '<div class="btn-row"><button class="btn-primary" onclick="renderFormView(\'' + code + '\')">Add film</button></div>';
+  } else {
+    if (fav.posterUrl) {
+      html += '<img class="poster-display" src="' + escapeAttr(fav.posterUrl) + '" alt="' + escapeAttr(fav.title) + '" onerror="this.outerHTML=\'<div class=&quot;poster-placeholder&quot;>🎬</div>\'">';
     } else {
       html += '<div class="poster-placeholder">🎬</div>';
     }
-    html += '<div class="movie-title">' + escapeHtml(movie.title) + '</div>';
-    if (movie.year || movie.director) {
-      html += '<div class="meta-line">' + escapeHtml(movie.year || '—') + (movie.director ? ' · Dir. ' + escapeHtml(movie.director) : '') + '</div>';
+    html += '<div class="movie-title">' + escapeHtml(fav.title) + '</div>';
+    if (fav.year || fav.director) {
+      html += '<div class="meta-line">' + escapeHtml(fav.year || '—') + (fav.director ? ' · Dir. ' + escapeHtml(fav.director) : '') + '</div>';
     }
-    html += '<div class="btn-row">';
-    html += '<button class="btn-secondary" onclick="renderFormView(\'' + code + '\')">Edit</button>';
-    html += '<button class="btn-danger" onclick="removePick(\'' + code + '\')">Remove</button>';
+
+    if (movies.length > 1) {
+      html += '<p class="movie-list-label">Your picks for ' + escapeHtml(name) + ' — tap ★ to set the favorite shown on the map/list</p>';
+    }
+    html += '<div class="movie-list">';
+    for (const m of movies) {
+      const isFav = m.id === data.favoriteId;
+      html += '<div class="movie-row" onclick="renderFormView(\'' + code + '\', \'' + m.id + '\')">';
+      html += m.posterUrl
+        ? '<img class="movie-row-thumb" src="' + escapeAttr(m.posterUrl) + '" onerror="this.remove()">'
+        : '<div class="movie-row-thumb"></div>';
+      html += '<div class="movie-row-text"><div class="movie-row-title">' + escapeHtml(m.title) + '</div>';
+      html += '<div class="movie-row-meta">' + escapeHtml(m.year || '—') + (m.director ? ' · ' + escapeHtml(m.director) : '') + '</div></div>';
+      html += '<button class="star-btn' + (isFav ? ' active' : '') + '" title="' + (isFav ? 'Favorite' : 'Set as favorite') + '" onclick="event.stopPropagation(); setFavoriteMovie(\'' + code + '\', \'' + m.id + '\')">★</button>';
+      html += '<button class="row-remove" title="Remove" onclick="event.stopPropagation(); removeMovie(\'' + code + '\', \'' + m.id + '\')">✕</button>';
+      html += '</div>';
+    }
     html += '</div>';
-  } else {
-    html += '<div class="poster-placeholder">🎬</div>';
-    html += '<p class="empty-msg">No film added yet for ' + escapeHtml(name) + '.</p>';
-    html += '<div class="btn-row"><button class="btn-primary" onclick="renderFormView(\'' + code + '\')">Add film</button><button class="btn-secondary" onclick="renderFormView(\'' + code + '\'); suggestRandomFilmForCode(\'' + code + '\')">🎲 Surprise me</button></div>';
+    html += '<div class="btn-row"><button class="btn-primary" onclick="renderFormView(\'' + code + '\')">+ Add another film</button></div>';
   }
   html += '</div>';
 
   card.innerHTML = html;
 }
 
-function renderFormView(code) {
+function renderFormView(code, editId) {
   const card = document.getElementById('modal-card');
-  const movie = getMovie(code) || { title: '' };
+  const existing = editId ? getMovies(code).find(m => m.id === editId) : null;
+  const movie = existing || { title: '' };
   window.pendingExtra = { year: movie.year || '', director: movie.director || '', posterUrl: movie.posterUrl || '' };
 
   const fieldWrapHtml =
@@ -1293,41 +1366,44 @@ function renderFormView(code) {
       '<div id="suggest-dropdown" class="suggest-dropdown" style="display:none;"></div>' +
     '</div>';
 
-  let html = '<form class="edit-form" onsubmit="return saveMovie(event, \'' + code + '\')">';
+  let html = '<form class="edit-form" onsubmit="return saveMovie(event, \'' + code + '\', ' + (editId ? '\'' + editId + '\'' : 'null') + ')">';
   html += modalHeader(code, fieldWrapHtml);
   html += '<div class="modal-body">';
-  if (getMovie(code)) {
+  if (getMovies(code).length) {
     html += '<span class="back-link" onclick="renderView(\'' + code + '\')">‹ Back</span>';
   }
   html += '<img id="poster-preview" class="poster-preview"' + (movie.posterUrl ? ' src="' + escapeAttr(movie.posterUrl) + '" style="display:block;"' : ' style="display:none;"') + ' onerror="this.style.display=\'none\'">';
   html += '<div id="captured-line" class="captured-line"></div>';
   html += '<div id="dup-warning" class="dup-warning"></div>';
-  html += '<div id="surprise-status" class="fetch-status"></div>';
-  html += '<div class="form-actions"><button type="submit" class="save">Save</button><button type="button" id="surprise-btn" class="cancel" onclick="suggestRandomFilmForCode(\'' + code + '\')">🎲 Surprise Again</button></div>';
+  html += '<div class="form-actions"><button type="submit" class="save">' + (editId ? 'Save changes' : 'Add film') + '</button>';
+  html += '<button type="button" class="cancel" onclick="' + (getMovies(code).length ? 'renderView(\'' + code + '\')' : 'closeModal()') + '">Cancel</button></div>';
+  if (editId) {
+    html += '<button type="button" class="row-remove-full" onclick="removeMovie(\'' + code + '\', \'' + editId + '\')">Remove this pick</button>';
+  }
   html += '</div>';
   html += '</form>';
 
   card.innerHTML = html;
   document.getElementById('f-title').focus();
   updateCapturedLine();
-  updateDupWarning(code);
+  updateDupWarning(code, editId);
 }
 
-// Checks whether the current title matches a film already saved to a different country.
-// Purely informational — never blocks saving, since co-productions and shared titles are real.
+// Checks whether the current title matches a film already saved to a different country —
+// checks every film saved for that country, not just its current favorite. Purely
+// informational, never blocks saving, since co-productions and shared titles are real.
 function findDuplicateCountries(title, excludeCode) {
   const t = title.trim().toLowerCase();
   if (!t) return [];
   const matches = [];
   for (const code of Object.keys(COUNTRY_NAMES)) {
     if (code === excludeCode) continue;
-    const movie = getMovie(code);
-    if (movie && movie.title.trim().toLowerCase() === t) matches.push(COUNTRY_NAMES[code]);
+    if (getMovies(code).some(m => m.title.trim().toLowerCase() === t)) matches.push(COUNTRY_NAMES[code]);
   }
   return matches;
 }
 
-function updateDupWarning(code) {
+function updateDupWarning(code, editId) {
   const el = document.getElementById('dup-warning');
   if (!el) return;
   const titleInput = document.getElementById('f-title');
@@ -1339,30 +1415,6 @@ function updateDupWarning(code) {
   } else {
     el.textContent = '';
     el.style.display = 'none';
-  }
-}
-
-async function suggestRandomFilmForCode(code) {
-  const btn = document.getElementById('surprise-btn');
-  const status = document.getElementById('surprise-status');
-  const dropdown = document.getElementById('suggest-dropdown');
-  if (dropdown) dropdown.style.display = 'none';
-  const countryName = COUNTRY_NAMES[code] || code;
-  if (btn) { btn.disabled = true; btn.textContent = '🎲 Picking…'; }
-  if (status) status.textContent = 'Looking for a film from ' + countryName + '…';
-  try {
-    const result = await suggestRandomFilm(countryName);
-    const titleInput = document.getElementById('f-title');
-    if (titleInput) titleInput.value = result.title;
-    window.pendingExtra = { year: result.year || '', director: result.director || '', posterUrl: result.posterUrl || '' };
-    updateCapturedLine();
-    updateDupWarning(code);
-    if (status) status.textContent = '';
-  } catch (e) {
-    console.error('suggestRandomFilm failed', e);
-    if (status) status.textContent = 'Live suggestions need a regular browser tab — type a title by hand instead.';
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '🎲 Surprise Again'; }
   }
 }
 
@@ -1507,24 +1559,55 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('.field-wrap')) dropdown.style.display = 'none';
 });
 
-async function saveMovie(evt, code) {
+async function saveMovie(evt, code, editId) {
   evt.preventDefault();
   const title = document.getElementById('f-title').value.trim();
   if (!title) return false;
   const extra = window.pendingExtra || { year: '', director: '', posterUrl: '' };
-  const entry = { title, year: extra.year || '', director: extra.director || '', posterUrl: extra.posterUrl || '' };
-  overrides[code] = entry;
+  const entryFields = { title, year: extra.year || '', director: extra.director || '', posterUrl: extra.posterUrl || '' };
+
+  const data = overrides[code] || { movies: [], favoriteId: null };
+  if (editId) {
+    const idx = data.movies.findIndex(m => m.id === editId);
+    if (idx >= 0) data.movies[idx] = { ...entryFields, id: editId };
+    else data.movies.push({ ...entryFields, id: editId }); // shouldn't normally happen, but don't lose the edit
+  } else {
+    const id = makeMovieId();
+    data.movies.push({ ...entryFields, id });
+    if (!data.favoriteId) data.favoriteId = id; // first film added becomes the favorite automatically
+  }
+  overrides[code] = data;
   delete removed[code];
-  await storageSet('movie:' + code, JSON.stringify(entry));
+  await storageSet('movie:' + code, JSON.stringify(data));
   paintMap();
-  closeModal();
+  renderView(code); // back to the country's list — lets you add several in a row without reopening
   return false;
 }
 
-async function removePick(code) {
-  removed[code] = true;
-  delete overrides[code];
-  await storageDelete('movie:' + code);
+async function setFavoriteMovie(code, movieId) {
+  const data = overrides[code];
+  if (!data) return;
+  data.favoriteId = movieId;
+  await storageSet('movie:' + code, JSON.stringify(data));
+  paintMap();
+  renderView(code);
+}
+
+async function removeMovie(code, movieId) {
+  const data = overrides[code];
+  if (!data) return;
+  data.movies = data.movies.filter(m => m.id !== movieId);
+  if (data.favoriteId === movieId) {
+    data.favoriteId = data.movies.length ? data.movies[0].id : null;
+  }
+  if (!data.movies.length) {
+    delete overrides[code];
+    removed[code] = true;
+    await storageDelete('movie:' + code);
+  } else {
+    overrides[code] = data;
+    await storageSet('movie:' + code, JSON.stringify(data));
+  }
   paintMap();
   renderView(code);
 }
@@ -1738,15 +1821,20 @@ function clearSearch() {
   input.focus();
 }
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  closeModal();
+  const welcome = document.getElementById('welcome-overlay');
+  if (welcome && welcome.classList.contains('open')) dismissWelcome();
+});
 
 /* ---------------- Export / import picks as JSON ---------------- */
 
 function exportPicksJSON() {
   const picks = {};
   for (const code of Object.keys(COUNTRY_NAMES)) {
-    const movie = getMovie(code);
-    if (movie) picks[code] = movie;
+    const data = overrides[code];
+    if (data && data.movies && data.movies.length) picks[code] = data;
   }
   const count = Object.keys(picks).length;
   if (!count) { alert('No picks to export yet — add a few films first.'); return; }
@@ -1771,27 +1859,35 @@ async function importPicksJSON(event) {
   try {
     const text = await file.text();
     const parsed = JSON.parse(text);
-    const picks = parsed.picks || parsed; // tolerate a raw {code: movie} file too, not just our export format
-    const codes = Object.keys(picks).filter(code => COUNTRY_NAMES[code] && picks[code] && picks[code].title);
+    const rawPicks = parsed.picks || parsed; // tolerate a raw {code: ...} file too, not just our export format
+
+    // Accepts either the current {movies, favoriteId} shape or an older single-movie
+    // export from before multi-movie support — normalizeCountryData handles both.
+    const normalizedByCode = {};
+    for (const code of Object.keys(rawPicks)) {
+      if (!COUNTRY_NAMES[code]) continue;
+      const normalized = normalizeCountryData(rawPicks[code]);
+      if (normalized) normalizedByCode[code] = normalized;
+    }
+    const codes = Object.keys(normalizedByCode);
 
     if (!codes.length) {
       alert('No valid picks found in that file.');
       return;
     }
-    const proceed = confirm('Import ' + codes.length + ' pick' + (codes.length === 1 ? '' : 's') +
+    const filmCount = codes.reduce((sum, c) => sum + normalizedByCode[c].movies.length, 0);
+    const proceed = confirm('Import ' + filmCount + ' film' + (filmCount === 1 ? '' : 's') + ' across ' + codes.length + ' countr' + (codes.length === 1 ? 'y' : 'ies') +
       '? This will overwrite any existing picks for those countries.');
     if (!proceed) return;
 
     for (const code of codes) {
-      const m = picks[code];
-      const entry = { title: m.title, year: m.year || '', director: m.director || '', posterUrl: m.posterUrl || '' };
-      overrides[code] = entry;
+      overrides[code] = normalizedByCode[code];
       delete removed[code];
-      await storageSet('movie:' + code, JSON.stringify(entry));
+      await storageSet('movie:' + code, JSON.stringify(normalizedByCode[code]));
     }
     paintMap();
     if (currentView === 'list') renderListView();
-    alert('Imported ' + codes.length + ' pick' + (codes.length === 1 ? '' : 's') + '.');
+    alert('Imported ' + filmCount + ' film' + (filmCount === 1 ? '' : 's') + ' across ' + codes.length + ' countr' + (codes.length === 1 ? 'y' : 'ies') + '.');
   } catch (e) {
     console.error('Import failed', e);
     alert('Could not read that file — make sure it\u2019s a JSON file exported from Cinemap.');
@@ -1920,10 +2016,24 @@ async function loadOverrides() {
     for (const key of keys) {
       try {
         const value = await storageGetValue(key);
-        if (value) overrides[key.replace('movie:', '')] = JSON.parse(value);
+        if (!value) continue;
+        const normalized = normalizeCountryData(JSON.parse(value));
+        if (normalized) overrides[key.replace('movie:', '')] = normalized;
       } catch (e) { /* skip a corrupted entry */ }
     }
   } catch (e) { console.error('Could not load saved picks', e); }
+}
+
+/* ---------------- First-time welcome popup ---------------- */
+
+async function dismissWelcome() {
+  document.getElementById('welcome-overlay').classList.remove('open');
+  await storageSet('onboarding-seen', '1');
+}
+
+async function checkFirstVisit() {
+  const seen = await storageGetValue('onboarding-seen');
+  if (!seen) document.getElementById('welcome-overlay').classList.add('open');
 }
 
 (async function init() {
@@ -1933,8 +2043,8 @@ async function loadOverrides() {
   await loadOverrides();
   paintMap();
   await updateKeyStatus();
+  await checkFirstVisit();
 })();
 </script>
 </body>
 </html>
-
