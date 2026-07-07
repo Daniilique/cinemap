@@ -36,21 +36,23 @@
     --bg-vign: none;
     --surface: #ffffff;
     --surface-2: #e8e8e8;
-    --gold: #c4192d;
-    --gold-dim: #8f1220;
+    --gold: #b3454c;
+    --gold-dim: #8a3d43;
+    --gold-rgb: 179,69,76;
     --velvet: #767676;
     --cream: #1b1b1b;
     --muted: #6b6b6b;
     --line: #d0d0d0;
     --map-empty: #e6e6e6;
     --map-empty-line: #c4c4c4;
-    --map-filled: #c4192d;
+    --map-filled: #b3454c;
     --map-filled-line: #1b1b1b;
     --map-hover: #2d89ef;
     --font-display: 'Segoe UI', 'Segoe UI Semibold', Tahoma, Geneva, Verdana, sans-serif;
     --font-mono: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
-  /* Noir (dark) theme override — swaps the same variable set when html.theme-dark is set */
+  /* Noir (dark) theme override — swaps the same variable set when html.theme-dark is set.
+     Keeps the fuller-saturation crimson; only the light theme's red was toned down. */
   html.theme-dark {
     --bg: #1b1b1b;
     --bg-vign: none;
@@ -58,6 +60,7 @@
     --surface-2: #333333;
     --gold: #c4192d;
     --gold-dim: #8f1220;
+    --gold-rgb: 196,25,45;
     --velvet: #767676;
     --cream: #ffffff;
     --muted: #a6a6a6;
@@ -92,9 +95,9 @@
     font-weight: 900; text-transform: uppercase; font-size: clamp(28px, 4.5vw, 48px);
     margin: 0; letter-spacing: -0.03em; color: var(--cream);
     display: inline-block; transform: skewX(-9deg);
-    text-shadow: 3px 3px 0 var(--gold), 3px 3px 12px rgba(196,25,45,0.7);
+    text-shadow: 3px 3px 0 var(--gold), 3px 3px 12px rgba(var(--gold-rgb),0.7);
   }
-  h1 em { font-style: normal; color: var(--gold); text-shadow: 3px 3px 0 #000000, 3px 3px 12px rgba(196,25,45,0.7); }
+  h1 em { font-style: normal; color: var(--gold); text-shadow: 3px 3px 0 #000000, 3px 3px 12px rgba(var(--gold-rgb),0.7); }
   .sub { color: var(--muted); font-size: 12px; max-width: 560px; line-height:1.5; margin-top:4px; }
 
   /* --- Search bar + clear (x) button --- */
@@ -263,9 +266,9 @@
     font-family: 'Arial Black', 'Haettenschweiler', 'Franklin Gothic Heavy', Impact, sans-serif;
     font-weight: 900; text-transform: uppercase; font-size: 32px; letter-spacing: -0.02em;
     display: inline-block; transform: skewX(-9deg); margin: 0 0 18px; color: var(--cream);
-    text-shadow: 3px 3px 0 var(--gold), 3px 3px 12px rgba(196,25,45,0.7);
+    text-shadow: 3px 3px 0 var(--gold), 3px 3px 12px rgba(var(--gold-rgb),0.7);
   }
-  .welcome-title em { font-style: normal; color: var(--gold); text-shadow: 3px 3px 0 #000000, 3px 3px 12px rgba(196,25,45,0.7); }
+  .welcome-title em { font-style: normal; color: var(--gold); text-shadow: 3px 3px 0 #000000, 3px 3px 12px rgba(var(--gold-rgb),0.7); }
   .welcome-text { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0 0 14px; text-align: left; }
   .welcome-btn { width: 100%; margin-top: 8px; }
 
@@ -2070,5 +2073,3 @@ async function checkFirstVisit() {
 </script>
 </body>
 </html>
-
-
