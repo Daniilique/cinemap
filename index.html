@@ -1930,6 +1930,29 @@ function loadImageEl(src) {
   });
 }
 
+// Real flag artwork instead of emoji: emoji flags render inconsistently (often blank) when drawn
+// onto a <canvas>, since that depends on the OS/browser having a color-emoji font installed and
+// canvas text rendering doesn't reliably use it. A real flag image avoids that entirely — same
+// "fetch the bytes, embed as a data URL" approach already used for movie posters, which also
+// guarantees it can't taint the canvas (unlike drawing a live cross-origin image directly).
+async function loadFlagImageForExport(code) {
+  const clean = code.replace(/^_/, '').toLowerCase();
+  try {
+    const res = await fetch('https://flagcdn.com/48x36/' + clean + '.png');
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Could not read flag image data'));
+      reader.readAsDataURL(blob);
+    });
+    return await loadImageEl(dataUrl);
+  } catch (e) {
+    return null; // no flag for this one (e.g. a non-standard code) — caption just shows the name
+  }
+}
+
 function wrapCanvasText(ctx, text, x, yCenter, maxWidth, lineHeight, maxLines) {
   const words = text.split(' ');
   const lines = [];
@@ -1959,44 +1982,68 @@ async function exportPosterWall() {
     return;
   }
 
-  const tileW = 160, tileH = 240, gap = 6;
+  const posterW = 160, posterH = 240, captionH = 56, gap = 6;
+  const tileH = posterH + captionH;
   const cols = Math.max(1, Math.min(12, Math.ceil(Math.sqrt(pickedCodes.length * 1.5))));
   const rows = Math.ceil(pickedCodes.length / cols);
 
   const canvas = document.createElement('canvas');
-  canvas.width = cols * tileW + (cols + 1) * gap;
+  canvas.width = cols * posterW + (cols + 1) * gap;
   canvas.height = rows * tileH + (rows + 1) * gap;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#1b1b1b';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Only embedded (data:) posters are safe to draw on canvas without risking a
+  // Only embedded (data:) posters/flags are safe to draw on canvas without risking a
   // cross-origin "tainted canvas" error that would block the whole export —
-  // anything else falls back to a flat placeholder tile with the title on it.
+  // posters that can't be embedded fall back to a flat placeholder tile with the title on it;
+  // flags that can't be fetched just leave the country name on its own, no flag drawn.
   const tiles = await Promise.all(pickedCodes.map(async code => {
     const movie = getMovie(code);
+    let img = null;
     if (movie.posterUrl && movie.posterUrl.startsWith('data:')) {
-      try { return { movie, img: await loadImageEl(movie.posterUrl) }; }
-      catch (e) { return { movie, img: null }; }
+      try { img = await loadImageEl(movie.posterUrl); } catch (e) { img = null; }
     }
-    return { movie, img: null };
+    const flagImg = await loadFlagImageForExport(code);
+    return { code, movie, img, flagImg };
   }));
 
   tiles.forEach((tile, i) => {
     const col = i % cols, row = Math.floor(i / cols);
-    const x = gap + col * (tileW + gap);
+    const x = gap + col * (posterW + gap);
     const y = gap + row * (tileH + gap);
+
     if (tile.img) {
-      ctx.drawImage(tile.img, x, y, tileW, tileH);
+      ctx.drawImage(tile.img, x, y, posterW, posterH);
     } else {
       ctx.fillStyle = '#c4192d';
-      ctx.fillRect(x, y, tileW, tileH);
+      ctx.fillRect(x, y, posterW, posterH);
       ctx.fillStyle = '#ffffff';
       ctx.font = '600 14px Segoe UI, Tahoma, sans-serif';
       ctx.textAlign = 'center';
-      wrapCanvasText(ctx, tile.movie.title, x + tileW / 2, y + tileH / 2, tileW - 20, 18, 4);
+      wrapCanvasText(ctx, tile.movie.title, x + posterW / 2, y + posterH / 2, posterW - 20, 18, 4);
       ctx.textAlign = 'left';
     }
+
+    // Caption strip below the poster: real flag artwork (not emoji — see loadFlagImageForExport)
+    // plus the country name, so the wall is identifiable at a glance.
+    const capY = y + posterH;
+    ctx.fillStyle = '#2b2b2b';
+    ctx.fillRect(x, capY, posterW, captionH);
+
+    let nameCenterY = capY + captionH / 2;
+    if (tile.flagImg) {
+      const flagW = 26, flagH = Math.round(flagW * (tile.flagImg.height / tile.flagImg.width));
+      ctx.drawImage(tile.flagImg, x + posterW / 2 - flagW / 2, capY + 6, flagW, flagH);
+      nameCenterY = capY + 6 + flagH + 15; // name sits below the flag instead of dead-center
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 12px Segoe UI, Tahoma, sans-serif';
+    ctx.textAlign = 'center';
+    const name = COUNTRY_NAMES[tile.code] || tile.code;
+    wrapCanvasText(ctx, name, x + posterW / 2, nameCenterY, posterW - 10, 14, 2);
+    ctx.textAlign = 'left';
   });
 
   let dataUrl;
@@ -2073,4 +2120,3 @@ async function checkFirstVisit() {
 </script>
 </body>
 </html>
-
