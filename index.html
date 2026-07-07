@@ -882,6 +882,7 @@ const COUNTRY_NAMES = {"af": "Afghanistan", "al": "Albania", "dz": "Algeria", "a
 let overrides = {};
 let removed = {};
 let currentCode = null;
+let currentEditId = null; // which specific movie entry is open in the form, if editing (vs. adding new)
 
 /* ---------------- Storage: window.storage when available, localStorage otherwise ---------------- */
 
@@ -1359,6 +1360,7 @@ function renderFormView(code, editId) {
   const existing = editId ? getMovies(code).find(m => m.id === editId) : null;
   const movie = existing || { title: '' };
   window.pendingExtra = { year: movie.year || '', director: movie.director || '', posterUrl: movie.posterUrl || '' };
+  currentEditId = editId || null;
 
   const fieldWrapHtml =
     '<div class="field-wrap">' +
@@ -1407,7 +1409,16 @@ function updateDupWarning(code, editId) {
   const el = document.getElementById('dup-warning');
   if (!el) return;
   const titleInput = document.getElementById('f-title');
-  const title = titleInput ? titleInput.value : '';
+  const title = (titleInput ? titleInput.value : '').trim();
+  if (!title) { el.textContent = ''; el.style.display = 'none'; return; }
+
+  const sameCountryDupe = getMovies(code).some(m => m.id !== editId && m.title.trim().toLowerCase() === title.toLowerCase());
+  if (sameCountryDupe) {
+    el.textContent = '⚠ "' + title + '" is already on this country\u2019s list — pick a different title.';
+    el.style.display = 'block';
+    return;
+  }
+
   const matches = findDuplicateCountries(title, code);
   if (matches.length) {
     el.textContent = '⚠ Already used for ' + matches.join(', ');
@@ -1510,7 +1521,7 @@ function onTitleInput() {
   // Any manual edit invalidates a previously picked suggestion's year/director/poster.
   window.pendingExtra = { year: '', director: '', posterUrl: '' };
   updateCapturedLine();
-  updateDupWarning(currentCode);
+  updateDupWarning(currentCode, currentEditId);
   const dropdown = document.getElementById('suggest-dropdown');
   const query = document.getElementById('f-title').value.trim();
   clearTimeout(suggestDebounceTimer);
@@ -1550,7 +1561,7 @@ async function pickSuggestion(index) {
   const posterUrl = r.posterUrl ? await posterDataUrl(r.posterUrl) : '';
   window.pendingExtra = { year: r.year || '', director: r.director || '', posterUrl };
   updateCapturedLine();
-  updateDupWarning(currentCode);
+  updateDupWarning(currentCode, currentEditId);
 }
 
 document.addEventListener('click', (e) => {
@@ -1563,10 +1574,21 @@ async function saveMovie(evt, code, editId) {
   evt.preventDefault();
   const title = document.getElementById('f-title').value.trim();
   if (!title) return false;
+
+  const data = overrides[code] || { movies: [], favoriteId: null };
+  const alreadyInThisCountry = data.movies.some(m => m.id !== editId && m.title.trim().toLowerCase() === title.toLowerCase());
+  if (alreadyInThisCountry) {
+    const el = document.getElementById('dup-warning');
+    if (el) {
+      el.textContent = '⚠ "' + title + '" is already on ' + (COUNTRY_NAMES[code] || code) + '\u2019s list — pick a different title.';
+      el.style.display = 'block';
+    }
+    return false;
+  }
+
   const extra = window.pendingExtra || { year: '', director: '', posterUrl: '' };
   const entryFields = { title, year: extra.year || '', director: extra.director || '', posterUrl: extra.posterUrl || '' };
 
-  const data = overrides[code] || { movies: [], favoriteId: null };
   if (editId) {
     const idx = data.movies.findIndex(m => m.id === editId);
     if (idx >= 0) data.movies[idx] = { ...entryFields, id: editId };
@@ -2048,5 +2070,3 @@ async function checkFirstVisit() {
 </script>
 </body>
 </html>
-
-
