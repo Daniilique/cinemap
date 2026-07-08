@@ -32,47 +32,55 @@
 <style>
   /* ===================== THEME VARIABLES (light theme = default) ===================== */
   :root {
-    --bg: #f3f3f3;
+    --bg: #f5f5f7;
     --bg-vign: none;
     --surface: #ffffff;
-    --surface-2: #e8e8e8;
-    --gold: #b3454c;
-    --gold-dim: #8a3d43;
-    --gold-rgb: 179,69,76;
+    --surface-2: #f0f0f2;
+    --gold: #a8434a;
+    --gold-dim: #8a3a40;
+    --gold-rgb: 168,67,74;
     --velvet: #767676;
     --cream: #1b1b1b;
     --muted: #6b6b6b;
-    --line: #d0d0d0;
+    --line: #e2e2e5;
     --map-empty: #e6e6e6;
     --map-empty-line: #c4c4c4;
-    --map-filled: #b3454c;
+    --map-filled: #a8434a;
     --map-filled-line: #1b1b1b;
-    --map-hover: #2d89ef;
+    --map-hover: #2d7dd2;
     --font-display: 'Segoe UI', 'Segoe UI Semibold', Tahoma, Geneva, Verdana, sans-serif;
     --font-mono: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.12);
   }
-  /* Noir (dark) theme override — swaps the same variable set when html.theme-dark is set.
-     Keeps the fuller-saturation crimson; only the light theme's red was toned down. */
+  /* Noir (dark) theme override — swaps the same variable set when html.theme-dark is set. */
   html.theme-dark {
-    --bg: #1b1b1b;
+    --bg: #17171a;
     --bg-vign: none;
-    --surface: #2b2b2b;
-    --surface-2: #333333;
-    --gold: #c4192d;
-    --gold-dim: #8f1220;
-    --gold-rgb: 196,25,45;
-    --velvet: #767676;
-    --cream: #ffffff;
-    --muted: #a6a6a6;
-    --line: #3d3d3d;
+    --surface: #242428;
+    --surface-2: #2c2c31;
+    --gold: #c0454d;
+    --gold-dim: #9a3a41;
+    --gold-rgb: 192,69,77;
+    --velvet: #8a8a8a;
+    --cream: #f2f2f2;
+    --muted: #9a9aa0;
+    --line: #38383e;
     --map-empty: #525252;
     --map-empty-line: #757575;
-    --map-filled: #c4192d;
+    --map-filled: #c0454d;
     --map-filled-line: #ffffff;
-    --map-hover: #2d89ef;
+    --map-hover: #2d7dd2;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.25);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.25);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.3);
   }
-  /* ===================== RESET (flat Metro/Fluent look: no rounded corners anywhere) ===================== */
-  * { box-sizing: border-box; border-radius: 0 !important; }
+  /* ===================== RESET ===================== */
+  * { box-sizing: border-box; }
   html, body { margin:0; padding:0; height:100%; overflow:hidden; }
   body {
     background: var(--bg-vign), var(--bg);
@@ -105,18 +113,19 @@
   #search {
     width: 100%; margin-top: 0;
     background: var(--surface); border: 1px solid var(--line); color: var(--cream);
-    padding: 9px 32px 9px 14px; font-family: var(--font-mono); font-size: 13px;
-    outline: none; transition: border-color .1s ease;
+    padding: 10px 34px 10px 14px; font-family: var(--font-mono); font-size: 13px;
+    outline: none; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
+    transition: border-color .15s ease, box-shadow .15s ease;
   }
-  #search:focus { border-color: var(--gold); }
+  #search:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(var(--gold-rgb),0.15); }
   #search::placeholder { color: var(--muted); }
   .search-clear {
-    position: absolute; top: 50%; right: 4px; transform: translateY(-50%);
+    position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
     background: transparent; border: none; color: var(--muted);
     width: 26px; height: 26px; font-size: 18px; line-height: 1; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; justify-content: center; border-radius: 50%;
   }
-  .search-clear:hover { color: var(--cream); }
+  .search-clear:hover { color: var(--cream); background: var(--surface-2); }
   .key-row { font-size: 10.5px; color: var(--muted); margin: 6px 2px 0; }
   .key-row a { color: var(--gold); }
   .key-btn { background: transparent; border: none; color: var(--gold); font-family: var(--font-mono); font-size: 10.5px; text-decoration: underline; cursor: pointer; padding: 0; }
@@ -124,21 +133,23 @@
 
   /* ===================== WORLD MAP (SVG, zoom/pan) ===================== */
   .map-card {
-    background: var(--surface); border: none;
+    background: var(--surface); border: 1px solid var(--line);
     padding: 10px; position:relative; margin-top: 12px;
     flex: 1; min-height: 0; display: flex; flex-direction: column;
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden;
   }
   #map-svg { width:100%; flex: 1; min-height: 0; display:block; cursor: grab; touch-action: none; }
   #map-svg.panning { cursor: grabbing; }
   .zoom-controls {
     position: absolute; top: 18px; right: 18px; z-index: 3;
-    display: flex; flex-direction: column; gap: 2px;
+    display: flex; flex-direction: column; gap: 4px;
   }
   .zoom-controls button {
-    width: 32px; height: 32px; background: var(--surface-2); border: none; color: var(--cream);
+    width: 32px; height: 32px; background: var(--surface); border: 1px solid var(--line); color: var(--cream);
     font-family: var(--font-mono); font-size: 16px; font-weight: 600; cursor: pointer; line-height:1;
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); transition: all .15s ease;
   }
-  .zoom-controls button:hover { background: var(--gold); }
+  .zoom-controls button:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
   #map-svg [id] { cursor:pointer; stroke: var(--map-empty-line); stroke-width: 0.6; fill: var(--map-empty); transition: fill .1s ease; }
   #map-svg [id].has-movie { fill: var(--map-filled); stroke: var(--map-filled-line); stroke-width: 1; }
   #map-svg [id]:hover { fill: var(--map-hover); stroke: var(--cream); }
@@ -146,31 +157,34 @@
   .map-caption { flex-shrink:0; display:flex; justify-content:space-between; font-size:10.5px; color: var(--muted); padding: 6px 4px 0; letter-spacing:.04em; }
 
   /* --- Map/List view toggle + export/import + theme switch --- */
-  .view-toggle { display:flex; align-items:center; gap:2px; margin-top: 10px; }
+  .view-toggle { display:flex; align-items:center; gap:6px; margin-top: 12px; }
   .view-btn {
-    background: var(--surface); border: none; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--line); color: var(--muted);
     font-family: var(--font-mono); font-size: 11px; letter-spacing:.06em; text-transform:uppercase; font-weight: 600;
-    padding: 8px 18px; cursor:pointer; transition: all .1s ease;
+    padding: 8px 16px; cursor:pointer; transition: all .15s ease;
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
+    display: inline-flex; align-items: center; gap: 6px;
   }
-  .view-btn:hover { color: var(--cream); }
-  .view-btn.active { background: var(--gold); color: var(--cream); }
+  .view-btn:hover { color: var(--cream); border-color: var(--gold); }
+  .view-btn.active { background: var(--gold); color: #fff; border-color: var(--gold); }
   .icon-btn {
-    background: var(--gold); border: none; color: var(--cream);
-    width: 34px; height: 34px; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition: background .1s ease;
+    background: var(--gold); border: none; color: #fff;
+    width: 36px; height: 36px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition: all .15s ease; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
   }
-  .icon-btn:hover { background: var(--gold-dim); }
+  .icon-btn:hover { background: var(--gold-dim); box-shadow: var(--shadow-md); transform: translateY(-1px); }
   .theme-switch {
-    position: absolute; top: 0; right: 0; width: 92px; height: 30px;
+    position: absolute; top: 0; right: 0; width: 92px; height: 32px;
     background: var(--surface-2); border: 1px solid var(--line); cursor: pointer; padding: 0;
+    border-radius: 999px; box-shadow: var(--shadow-sm);
   }
   .theme-switch-knob {
-    position: absolute; top: 2px; left: 2px; width: 44px; height: 24px;
-    background: var(--gold); transition: transform .15s ease;
+    position: absolute; top: 3px; left: 3px; width: 42px; height: 26px;
+    background: var(--gold); transition: transform .2s ease; border-radius: 999px; box-shadow: var(--shadow-sm);
   }
   html.theme-dark .theme-switch-knob { transform: translateX(44px); }
   .switch-icon {
-    position: absolute; top: 0; width: 46px; height: 30px; z-index: 1; pointer-events: none;
+    position: absolute; top: 0; width: 46px; height: 32px; z-index: 1; pointer-events: none;
     display: flex; align-items: center; justify-content: center;
     font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
     color: var(--cream);
@@ -185,17 +199,18 @@
   }
   .list-body {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 2px;
+    gap: 8px;
   }
   .list-row {
     display:flex; flex-direction: column; justify-content: flex-end;
     aspect-ratio: 2 / 3; cursor:pointer;
     background: var(--surface);
-    transition: filter .1s ease; overflow: hidden;
+    transition: filter .15s ease, transform .15s ease, box-shadow .15s ease;
+    overflow: hidden; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
   }
   .list-row:not(.picked) { padding: 10px; background-size: cover; background-position: center; }
   .list-row.picked { padding: 0; perspective: 700px; }
-  .list-row:hover { filter: brightness(1.15); }
+  .list-row:hover { filter: brightness(1.1); box-shadow: var(--shadow-md); transform: translateY(-2px); }
   .list-flag { font-size: 20px; line-height:1; margin-bottom: auto; }
   .list-country { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .02em; color: var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .list-film { font-size: 10.5px; margin-top: 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -232,34 +247,37 @@
   footer { flex-shrink:0; margin-top: 8px; font-size: 10px; color: var(--muted); text-align:center; line-height:1.4; }
 
   /* --- Export/Import JSON buttons (sit above the footer) --- */
-  .data-io { display:flex; gap:2px; margin-top: 8px; flex-shrink:0; }
+  .data-io { display:flex; gap:6px; margin-top: 8px; flex-shrink:0; }
   .io-btn {
-    background: var(--surface); border: none; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--line); color: var(--muted);
     font-family: var(--font-mono); font-size: 10px; letter-spacing:.05em; text-transform:uppercase; font-weight: 600;
-    padding: 5px 12px; cursor:pointer; transition: all .1s ease;
+    padding: 6px 14px; cursor:pointer; transition: all .15s ease;
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
   }
-  .io-btn:hover { color: var(--cream); background: var(--surface-2); }
+  .io-btn:hover { color: var(--cream); border-color: var(--gold); }
 
   /* ---------- Modal ---------- */
   /* ===================== COUNTRY MODAL (popup) ===================== */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    position: fixed; inset: 0; background: rgba(20,20,24,0.55); backdrop-filter: blur(3px);
     display:flex; align-items:center; justify-content:center; z-index: 100;
-    opacity: 0; pointer-events:none; transition: opacity .12s ease; padding: 12px;
+    opacity: 0; pointer-events:none; transition: opacity .15s ease; padding: 12px;
   }
   .modal-overlay.open { opacity: 1; pointer-events:auto; }
   .modal-card {
-    width: min(94vw, 580px); max-height: 97vh; overflow-y:auto;
+    width: min(94vw, 580px); max-height: 97vh; overflow-y:auto; overflow-x:hidden;
     background: var(--surface);
     border: none; padding: 0;
-    transition: transform .12s ease;
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+    transform: scale(.97) translateY(6px); transition: transform .18s ease;
   }
-  .modal-overlay.open .modal-card { transform: none; }
+  .modal-overlay.open .modal-card { transform: scale(1) translateY(0); }
 
   /* --- First-time welcome popup --- */
   .welcome-card {
     width: min(94vw, 440px); max-height: 90vh; overflow-y: auto;
     background: var(--surface); border: none; padding: 34px 30px 30px; text-align: center;
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
   }
   .welcome-flag { font-size: 40px; margin-bottom: 10px; }
   .welcome-title {
@@ -274,7 +292,7 @@
 
   .modal-head {
     position: sticky; top: 0; z-index: 5; background: var(--surface);
-    padding: 30px 34px 14px; margin-bottom: 0;
+    padding: 30px 34px 14px; margin-bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
   .modal-head-row { display:flex; align-items:flex-start; justify-content:space-between; }
   .modal-body { padding: 0 34px 30px; }
@@ -289,56 +307,61 @@
     background: var(--surface-2); border: none; color: var(--muted);
     width: 34px; height: 34px; cursor:pointer; font-size: 15px; line-height:1;
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    border-radius: 50%; transition: all .15s ease;
   }
-  .modal-close:hover { color: var(--cream); background: var(--gold); }
+  .modal-close:hover { color: #fff; background: var(--gold); }
   .modal-card hr { border: none; border-top: 1px solid var(--line); margin: 6px 0 16px; }
 
   /* --- Poster display (view mode) --- */
   .poster-placeholder {
     width: 190px; aspect-ratio:2/3; border:1px solid var(--line); background: var(--surface-2);
-    display:flex; align-items:center; justify-content:center; font-size: 42px; color: var(--muted); margin: 4px auto 16px;
+    display:flex; align-items:center; justify-content:center; color: var(--muted); margin: 4px auto 16px;
+    border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
   }
-  .poster-display { width: 190px; aspect-ratio:2/3; object-fit:cover; border:none; background: var(--surface-2); display:block; margin: 4px auto 16px; }
-  .poster-preview { width: 130px; aspect-ratio:2/3; object-fit:cover; border:1px solid var(--line); background: var(--surface-2); display:none; margin: 0 auto 12px; }
+  .poster-placeholder svg { width: 42px; height: 42px; opacity: .5; }
+  .poster-display { width: 190px; aspect-ratio:2/3; object-fit:cover; border:none; background: var(--surface-2); display:block; margin: 4px auto 16px; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+  .poster-preview { width: 130px; aspect-ratio:2/3; object-fit:cover; border:1px solid var(--line); background: var(--surface-2); display:none; margin: 0 auto 12px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
   .movie-title { font-family: var(--font-display); font-style: normal; font-weight: 300; font-size: 26px; color: var(--gold); text-align:center; line-height:1.25; margin: 0 0 8px; }
   .meta-line { font-size: 12.5px; color: var(--muted); text-align:center; margin-bottom: 6px; }
   .empty-msg { color: var(--muted); font-size: 13px; line-height:1.6; text-align:center; margin: 6px 0 4px; }
 
   /* --- Add-film button (view mode) --- */
-  .btn-row { display:flex; gap:2px; margin-top: 16px; }
+  .btn-row { display:flex; gap:8px; margin-top: 16px; }
   .btn-row button {
     flex:1; font-family: var(--font-mono); font-size: 11px; letter-spacing:.1em; text-transform:uppercase; font-weight: 600;
-    padding: 12px; cursor:pointer;
+    padding: 12px; cursor:pointer; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); transition: all .15s ease;
   }
-  .btn-primary { background: var(--gold); color:var(--cream); border:none; }
-  .btn-primary:hover { background: var(--gold-dim); }
+  .btn-primary { background: var(--gold); color:#fff; border:none; }
+  .btn-primary:hover { background: var(--gold-dim); box-shadow: var(--shadow-md); transform: translateY(-1px); }
 
   /* --- Per-country movie list: multiple films, one starred as the favorite --- */
   .movie-list-label { font-size: 10.5px; color: var(--muted); text-align:center; margin: 16px 0 8px; }
-  .movie-list { display:flex; flex-direction:column; gap: 2px; margin-top: 6px; }
-  .movie-row { display:flex; align-items:center; gap:10px; padding: 8px 10px; background: var(--surface-2); cursor:pointer; }
-  .movie-row:hover { background: var(--map-hover); }
-  .movie-row-thumb { width:32px; height:45px; object-fit:cover; background: var(--surface); flex-shrink:0; }
+  .movie-list { display:flex; flex-direction:column; gap: 6px; margin-top: 6px; }
+  .movie-row { display:flex; align-items:center; gap:10px; padding: 8px 10px; background: var(--surface-2); cursor:pointer; border-radius: var(--radius-sm); transition: all .15s ease; }
+  .movie-row:hover { background: var(--map-hover); box-shadow: var(--shadow-sm); }
+  .movie-row-thumb { width:32px; height:45px; object-fit:cover; background: var(--surface); flex-shrink:0; border-radius: 6px; }
   .movie-row-text { flex:1; min-width:0; }
   .movie-row-title { font-size: 12.5px; color: var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .movie-row-meta { font-size: 10.5px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .star-btn {
     background: transparent; border: none; color: var(--line); font-size: 17px; cursor: pointer;
     width: 28px; height: 28px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    border-radius: 50%; transition: all .15s ease;
   }
   .star-btn.active { color: var(--gold); }
-  .star-btn:hover { color: var(--gold-dim); }
+  .star-btn:hover { color: var(--gold-dim); background: var(--surface); }
   .row-remove {
     background: transparent; border: none; color: var(--muted); font-size: 14px; cursor: pointer;
     width: 26px; height: 26px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    border-radius: 50%; transition: all .15s ease;
   }
-  .row-remove:hover { color: var(--velvet); }
+  .row-remove:hover { color: #fff; background: var(--velvet); }
   .row-remove-full {
-    width: 100%; background: transparent; border: none; color: var(--velvet);
+    width: 100%; background: transparent; border: 1px solid var(--line); color: var(--velvet);
     font-family: var(--font-mono); font-size: 11px; letter-spacing:.08em; text-transform:uppercase; font-weight: 600;
-    padding: 10px; cursor: pointer; margin-top: 2px;
+    padding: 10px; cursor: pointer; margin-top: 2px; border-radius: var(--radius-sm); transition: all .15s ease;
   }
-  .row-remove-full:hover { color: var(--cream); background: var(--velvet); }
+  .row-remove-full:hover { color: #fff; background: var(--velvet); border-color: var(--velvet); }
 
   /* ---------- Add / edit form: single Google-style field with autocomplete dropdown ---------- */
   /* ===================== ADD/EDIT FORM: single search field + suggestions ===================== */
@@ -347,10 +370,12 @@
   .google-field {
     display:flex; align-items:center; gap:10px;
     background: var(--surface-2); border: 1px solid var(--line);
-    padding: 13px 18px; transition: border-color .1s ease;
+    padding: 13px 18px; transition: border-color .15s ease, box-shadow .15s ease;
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
   }
-  .google-field:focus-within { border-color: var(--gold); }
-  .google-icon { font-size: 16px; flex-shrink:0; opacity:.85; }
+  .google-field:focus-within { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(var(--gold-rgb),0.15); }
+  .google-icon { flex-shrink:0; opacity:.75; display:flex; }
+  .google-icon svg { width: 17px; height: 17px; }
   .google-field input {
     flex:1; background: transparent; border: none; color: var(--cream);
     font-family: var(--font-mono); font-size: 14px; outline:none;
@@ -358,16 +383,19 @@
   .google-field input::placeholder { color: var(--muted); }
   /* --- Autocomplete suggestion dropdown --- */
   .suggest-dropdown {
-    position: absolute; left:0; right:0; top: calc(100% + 4px); z-index: 4;
-    background: var(--surface-2); border: 1px solid var(--line);
-    max-height: 420px; overflow-y: auto;
+    position: absolute; left:0; right:0; top: calc(100% + 8px); z-index: 4;
+    background: var(--surface); border: 1px solid var(--line);
+    max-height: 420px; overflow-y: auto; border-radius: var(--radius-md); box-shadow: var(--shadow-md);
   }
-  .suggest-item { display:flex; gap:12px; align-items:center; padding: 10px 14px; cursor:pointer; }
-  .suggest-item:hover, .suggest-item.highlighted { background: var(--gold); }
-  .suggest-thumb { width:40px; height:56px; object-fit:cover; background: var(--surface); flex-shrink:0; }
+  .suggest-item { display:flex; gap:12px; align-items:center; padding: 10px 14px; cursor:pointer; border-radius: var(--radius-sm); margin: 4px; }
+  .suggest-item:hover, .suggest-item.highlighted { background: var(--surface-2); }
+  .suggest-thumb { width:40px; height:56px; object-fit:cover; background: var(--surface-2); flex-shrink:0; border-radius: 6px; }
   .suggest-text { display:flex; flex-direction:column; gap:2px; overflow:hidden; min-width:0; }
   .suggest-title { font-size:13.5px; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .suggest-meta { font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .suggest-country-match { color: var(--gold); }
+  .suggest-country-mismatch { color: var(--velvet); }
+  .suggest-country-unknown { color: var(--muted); font-style: italic; }
   .suggest-status { padding: 10px 14px; font-size: 11px; color: var(--muted); }
   .captured-line {
     display:none; font-size: 11px; color: var(--gold); text-align:center;
@@ -377,12 +405,14 @@
   .dup-warning {
     display:none; font-size: 12.5px; color: #ffffff; text-align:center;
     margin: 2px 0 0; padding: 9px 12px; background: var(--gold); font-weight: 600; letter-spacing: .01em;
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
   }
-  .form-actions { display:flex; gap:2px; margin-top: 2px; }
-  .form-actions button { flex:1; font-family: var(--font-mono); font-size: 11px; letter-spacing:.1em; text-transform:uppercase; font-weight: 600; padding: 12px; cursor:pointer; }
-  .form-actions .save { background: var(--gold); color:var(--cream); border:none; }
-  .form-actions .save:hover { background: var(--gold-dim); }
-  .form-actions .cancel { background: var(--surface-2); color: var(--muted); border:none; }
+  .form-actions { display:flex; gap:8px; margin-top: 2px; }
+  .form-actions button { flex:1; font-family: var(--font-mono); font-size: 11px; letter-spacing:.1em; text-transform:uppercase; font-weight: 600; padding: 12px; cursor:pointer; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); transition: all .15s ease; }
+  .form-actions .save { background: var(--gold); color:#fff; border:none; }
+  .form-actions .save:hover { background: var(--gold-dim); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .form-actions .cancel { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); box-shadow: none; }
+  .form-actions .cancel:hover { color: var(--cream); }
   .back-link { font-size: 10.5px; color: var(--gold); cursor:pointer; margin-bottom: 12px; display:inline-block; }
   .back-link:hover { color: var(--cream); }
   /* ===================== SHORT-VIEWPORT FALLBACK ===================== */
@@ -414,8 +444,14 @@
     </div>
     <datalist id="country-list"><option value="Afghanistan"><option value="Albania"><option value="Algeria"><option value="Angola"><option value="Argentina"><option value="Armenia"><option value="Australia"><option value="Austria"><option value="Azerbaijan"><option value="Bahamas"><option value="Bangladesh"><option value="Belarus"><option value="Belgium"><option value="Belize"><option value="Benin"><option value="Bhutan"><option value="Bolivia"><option value="Bosnia and Herzegovina"><option value="Botswana"><option value="Brazil"><option value="Brunei"><option value="Bulgaria"><option value="Burkina Faso"><option value="Burundi"><option value="Cambodia"><option value="Cameroon"><option value="Canada"><option value="Central African Republic"><option value="Chad"><option value="Chile"><option value="China"><option value="Colombia"><option value="Congo"><option value="Costa Rica"><option value="Cote d'Ivoire"><option value="Croatia"><option value="Cuba"><option value="Cyprus"><option value="Czech Republic"><option value="DR Congo"><option value="Denmark"><option value="Djibouti"><option value="Dominican Republic"><option value="Ecuador"><option value="Egypt"><option value="El Salvador"><option value="Equatorial Guinea"><option value="Eritrea"><option value="Estonia"><option value="Eswatini"><option value="Ethiopia"><option value="Falkland Islands"><option value="Fiji"><option value="Finland"><option value="Fr. S. Antarctic Lands"><option value="France"><option value="Gabon"><option value="Gambia"><option value="Georgia"><option value="Germany"><option value="Ghana"><option value="Greece"><option value="Greenland"><option value="Guatemala"><option value="Guinea"><option value="Guinea-Bissau"><option value="Guyana"><option value="Haiti"><option value="Honduras"><option value="Hungary"><option value="Iceland"><option value="India"><option value="Indonesia"><option value="Iran"><option value="Iraq"><option value="Ireland"><option value="Israel"><option value="Italy"><option value="Jamaica"><option value="Japan"><option value="Jordan"><option value="Kazakhstan"><option value="Kenya"><option value="Kuwait"><option value="Kyrgyzstan"><option value="Laos"><option value="Latvia"><option value="Lebanon"><option value="Lesotho"><option value="Liberia"><option value="Libya"><option value="Lithuania"><option value="Luxembourg"><option value="Madagascar"><option value="Malawi"><option value="Malaysia"><option value="Mali"><option value="Malta"><option value="Mauritania"><option value="Mexico"><option value="Moldova"><option value="Mongolia"><option value="Montenegro"><option value="Morocco"><option value="Mozambique"><option value="Myanmar"><option value="Namibia"><option value="Nepal"><option value="Netherlands"><option value="New Caledonia"><option value="New Zealand"><option value="Nicaragua"><option value="Niger"><option value="Nigeria"><option value="North Korea"><option value="North Macedonia"><option value="Norway"><option value="Oman"><option value="Pakistan"><option value="Palestine"><option value="Panama"><option value="Papua New Guinea"><option value="Paraguay"><option value="Peru"><option value="Philippines"><option value="Poland"><option value="Portugal"><option value="Puerto Rico"><option value="Qatar"><option value="Romania"><option value="Russia"><option value="Rwanda"><option value="Saudi Arabia"><option value="Senegal"><option value="Serbia"><option value="Sierra Leone"><option value="Singapore"><option value="Slovakia"><option value="Slovenia"><option value="Solomon Islands"><option value="Somalia"><option value="Somaliland"><option value="South Africa"><option value="South Korea"><option value="South Sudan"><option value="Spain"><option value="Sri Lanka"><option value="Sudan"><option value="Suriname"><option value="Sweden"><option value="Switzerland"><option value="Syria"><option value="Taiwan"><option value="Tajikistan"><option value="Tanzania"><option value="Thailand"><option value="Timor-Leste"><option value="Togo"><option value="Trinidad and Tobago"><option value="Tunisia"><option value="Turkey"><option value="Turkmenistan"><option value="Uganda"><option value="Ukraine"><option value="United Arab Emirates"><option value="United Kingdom"><option value="United States"><option value="Uruguay"><option value="Uzbekistan"><option value="Vanuatu"><option value="Venezuela"><option value="Vietnam"><option value="Western Sahara"><option value="Yemen"><option value="Zambia"><option value="Zimbabwe"></datalist>
     <div class="view-toggle">
-      <button type="button" id="view-btn-map" class="view-btn active" onclick="setView('map')">🗺 Map</button>
-      <button type="button" id="view-btn-list" class="view-btn" onclick="setView('list')">☰ List</button>
+      <button type="button" id="view-btn-map" class="view-btn active" onclick="setView('map')">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>
+        Map
+      </button>
+      <button type="button" id="view-btn-list" class="view-btn" onclick="setView('list')">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        List
+      </button>
       <button type="button" class="icon-btn" onclick="exportPosterWall()" title="Export poster wall">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 3v12"/>
@@ -877,6 +913,8 @@ try {
   if (localStorage.getItem('theme-pref') === 'dark') document.documentElement.classList.add('theme-dark');
 } catch (e) { /* localStorage unavailable — default light stays, async check will still run */ }
 
+const ICON_FILM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 6 3 11l-1-3.5L19.2 2.5z"/><path d="M2 11h20v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="m6.2 5.3 3.1 3.9M11.2 4 14.3 7.9M16.2 2.8l3.1 3.9"/></svg>';
+
 const COUNTRY_NAMES = {"af": "Afghanistan", "al": "Albania", "dz": "Algeria", "ao": "Angola", "ar": "Argentina", "am": "Armenia", "au": "Australia", "at": "Austria", "az": "Azerbaijan", "bs": "Bahamas", "bd": "Bangladesh", "by": "Belarus", "be": "Belgium", "bz": "Belize", "bj": "Benin", "bt": "Bhutan", "bo": "Bolivia", "ba": "Bosnia and Herzegovina", "bw": "Botswana", "br": "Brazil", "bn": "Brunei", "bg": "Bulgaria", "bf": "Burkina Faso", "bi": "Burundi", "kh": "Cambodia", "cm": "Cameroon", "ca": "Canada", "cf": "Central African Republic", "td": "Chad", "cl": "Chile", "cn": "China", "co": "Colombia", "cg": "Congo", "cr": "Costa Rica", "ci": "Cote d'Ivoire", "hr": "Croatia", "cu": "Cuba", "cy": "Cyprus", "cz": "Czech Republic", "cd": "DR Congo", "dk": "Denmark", "dj": "Djibouti", "do": "Dominican Republic", "ec": "Ecuador", "eg": "Egypt", "sv": "El Salvador", "gq": "Equatorial Guinea", "er": "Eritrea", "ee": "Estonia", "et": "Ethiopia", "fk": "Falkland Islands", "fj": "Fiji", "fi": "Finland", "tf": "Fr. S. Antarctic Lands", "fr": "France", "ga": "Gabon", "gm": "Gambia", "ge": "Georgia", "de": "Germany", "gh": "Ghana", "gr": "Greece", "gl": "Greenland", "gt": "Guatemala", "gn": "Guinea", "gw": "Guinea-Bissau", "gy": "Guyana", "ht": "Haiti", "hn": "Honduras", "hu": "Hungary", "is": "Iceland", "in": "India", "id": "Indonesia", "ir": "Iran", "iq": "Iraq", "ie": "Ireland", "il": "Israel", "it": "Italy", "jm": "Jamaica", "jp": "Japan", "jo": "Jordan", "kz": "Kazakhstan", "ke": "Kenya", "kw": "Kuwait", "kg": "Kyrgyzstan", "la": "Laos", "lv": "Latvia", "lb": "Lebanon", "ls": "Lesotho", "lr": "Liberia", "ly": "Libya", "lt": "Lithuania", "lu": "Luxembourg", "mk": "North Macedonia", "mg": "Madagascar", "mw": "Malawi", "my": "Malaysia", "ml": "Mali", "mt": "Malta", "mr": "Mauritania", "mx": "Mexico", "md": "Moldova", "mn": "Mongolia", "me": "Montenegro", "ma": "Morocco", "mz": "Mozambique", "mm": "Myanmar", "na": "Namibia", "np": "Nepal", "nl": "Netherlands", "nc": "New Caledonia", "nz": "New Zealand", "ni": "Nicaragua", "ne": "Niger", "ng": "Nigeria", "kp": "North Korea", "no": "Norway", "om": "Oman", "pk": "Pakistan", "ps": "Palestine", "pa": "Panama", "pg": "Papua New Guinea", "py": "Paraguay", "pe": "Peru", "ph": "Philippines", "pl": "Poland", "pt": "Portugal", "pr": "Puerto Rico", "qa": "Qatar", "ro": "Romania", "ru": "Russia", "rw": "Rwanda", "sa": "Saudi Arabia", "sn": "Senegal", "rs": "Serbia", "sl": "Sierra Leone", "sg": "Singapore", "sk": "Slovakia", "si": "Slovenia", "sb": "Solomon Islands", "so": "Somalia", "_somaliland": "Somaliland", "za": "South Africa", "kr": "South Korea", "ss": "South Sudan", "es": "Spain", "lk": "Sri Lanka", "sd": "Sudan", "sr": "Suriname", "sz": "Eswatini", "se": "Sweden", "ch": "Switzerland", "sy": "Syria", "tw": "Taiwan", "tj": "Tajikistan", "tz": "Tanzania", "th": "Thailand", "tl": "Timor-Leste", "tg": "Togo", "tt": "Trinidad and Tobago", "tn": "Tunisia", "tr": "Turkey", "tm": "Turkmenistan", "ug": "Uganda", "ua": "Ukraine", "ae": "United Arab Emirates", "gb": "United Kingdom", "us": "United States", "uy": "Uruguay", "uz": "Uzbekistan", "vu": "Vanuatu", "ve": "Venezuela", "vn": "Vietnam", "eh": "Western Sahara", "ye": "Yemen", "zm": "Zambia", "zw": "Zimbabwe"};
 
 // App state: overrides = {countryCode: {title, year, director, posterUrl}} for every pick made
@@ -1320,14 +1358,14 @@ function renderView(code) {
   html += '<hr>';
 
   if (!movies.length) {
-    html += '<div class="poster-placeholder">🎬</div>';
+    html += '<div class="poster-placeholder">' + ICON_FILM + '</div>';
     html += '<p class="empty-msg">No film added yet for ' + escapeHtml(name) + '.</p>';
     html += '<div class="btn-row"><button class="btn-primary" onclick="renderFormView(\'' + code + '\')">Add film</button></div>';
   } else {
     if (fav.posterUrl) {
       html += '<img class="poster-display" src="' + escapeAttr(fav.posterUrl) + '" alt="' + escapeAttr(fav.title) + '" onerror="this.outerHTML=\'<div class=&quot;poster-placeholder&quot;>🎬</div>\'">';
     } else {
-      html += '<div class="poster-placeholder">🎬</div>';
+      html += '<div class="poster-placeholder">' + ICON_FILM + '</div>';
     }
     html += '<div class="movie-title">' + escapeHtml(fav.title) + '</div>';
     if (fav.year || fav.director) {
@@ -1367,7 +1405,7 @@ function renderFormView(code, editId) {
 
   const fieldWrapHtml =
     '<div class="field-wrap">' +
-      '<div class="google-field"><span class="google-icon">🎬</span><input id="f-title" type="text" value="' + escapeAttr(movie.title) + '" placeholder="Type a film title…" required autocomplete="off" oninput="onTitleInput()" onkeydown="handleTitleKeydown(event)"></div>' +
+      '<div class="google-field"><span class="google-icon">' + ICON_FILM + '</span><input id="f-title" type="text" value="' + escapeAttr(movie.title) + '" placeholder="Type a film title…" required autocomplete="off" oninput="onTitleInput()" onkeydown="handleTitleKeydown(event)"></div>' +
       '<div id="suggest-dropdown" class="suggest-dropdown" style="display:none;"></div>' +
     '</div>';
 
@@ -1465,7 +1503,7 @@ let suggestRequestId = 0;
 
 let suggestHighlightIndex = -1;
 
-function renderSuggestList(results) {
+function renderSuggestList(results, countryName) {
   const dropdown = document.getElementById('suggest-dropdown');
   if (!dropdown) return;
   suggestHighlightIndex = -1;
@@ -1474,13 +1512,23 @@ function renderSuggestList(results) {
     window.lastSuggestResults = [];
     return;
   }
-  dropdown.innerHTML = results.map((r, i) =>
-    '<div class="suggest-item" onclick="pickSuggestion(' + i + ')">' +
+  const needle = (countryName || '').toLowerCase();
+  dropdown.innerHTML = results.map((r, i) => {
+    let countryBadge = '';
+    if (r.countryField) {
+      const isMatch = needle && r.countryField.toLowerCase().includes(needle);
+      countryBadge = isMatch
+        ? ' · <span class="suggest-country suggest-country-match">' + escapeHtml(r.countryField) + '</span>'
+        : ' · <span class="suggest-country suggest-country-mismatch">⚠ ' + escapeHtml(r.countryField) + ' (not ' + escapeHtml(countryName) + ')</span>';
+    } else {
+      countryBadge = ' · <span class="suggest-country suggest-country-unknown">❔ country unverified</span>';
+    }
+    return '<div class="suggest-item" onclick="pickSuggestion(' + i + ')">' +
       (r.posterUrl ? '<img class="suggest-thumb" src="' + escapeAttr(r.posterUrl) + '" onerror="this.remove()">' : '<div class="suggest-thumb"></div>') +
       '<div class="suggest-text"><div class="suggest-title">' + escapeHtml(r.title) + '</div>' +
-      '<div class="suggest-meta">' + escapeHtml(r.year || '—') + (r.director ? ' · ' + escapeHtml(r.director) : '') + '</div></div>' +
-    '</div>'
-  ).join('');
+      '<div class="suggest-meta">' + escapeHtml(r.year || '—') + (r.director ? ' · ' + escapeHtml(r.director) : '') + countryBadge + '</div></div>' +
+    '</div>';
+  }).join('');
   window.lastSuggestResults = results;
 }
 
@@ -1545,7 +1593,7 @@ async function runSuggestSearch(query, myRequestId) {
     const countryName = COUNTRY_NAMES[currentCode] || '';
     const results = await searchFilmSuggestions(query, countryName);
     if (myRequestId !== suggestRequestId) return; // a newer keystroke superseded this search
-    renderSuggestList(results);
+    renderSuggestList(results, countryName);
   } catch (e) {
     if (myRequestId !== suggestRequestId) return;
     console.error('searchFilmSuggestions failed', e);
@@ -2118,7 +2166,5 @@ async function checkFirstVisit() {
   await checkFirstVisit();
 })();
 </script>
-
-  
 </body>
 </html>
