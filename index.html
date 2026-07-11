@@ -87,12 +87,13 @@
     color: var(--cream);
     font-family: var(--font-mono);
     height: 100vh;
+    height: 100dvh; /* dvh accounts for mobile browser chrome (address bar); vh above is the fallback for older browsers */
   }
   ::selection { background: var(--gold); color: var(--surface); }
 
   /* ===================== PAGE LAYOUT (fixed to viewport height, no page scroll) ===================== */
   .wrap {
-    max-width: 1180px; margin: 0 auto; height: 100vh;
+    max-width: 1180px; margin: 0 auto; height: 100vh; height: 100dvh;
     padding: 18px 24px 12px; display:flex; flex-direction:column;
   }
 
@@ -265,7 +266,7 @@
   }
   .modal-overlay.open { opacity: 1; pointer-events:auto; }
   .modal-card {
-    width: min(94vw, 580px); min-height: 480px; max-height: 97vh; overflow-y:auto; overflow-x:hidden;
+    width: min(94vw, 580px); min-height: 480px; max-height: 97vh; max-height: 97dvh; overflow-y:auto; overflow-x:hidden;
     background: var(--surface);
     border: none; padding: 0; display: flex; flex-direction: column;
     border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
@@ -275,7 +276,7 @@
 
   /* --- First-time welcome popup --- */
   .welcome-card {
-    width: min(94vw, 440px); max-height: 90vh; overflow-y: auto;
+    width: min(94vw, 440px); max-height: 90vh; max-height: 90dvh; overflow-y: auto;
     background: var(--surface); border: none; padding: 34px 30px 30px; text-align: center;
     border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
   }
