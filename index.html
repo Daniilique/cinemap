@@ -418,6 +418,14 @@
   .form-actions .cancel:hover { color: var(--cream); }
   .back-link { font-size: 10.5px; color: var(--gold); cursor:pointer; margin-bottom: 12px; display:inline-block; }
   .back-link:hover { color: var(--cream); }
+  .manual-fields { flex-direction: column; gap: 8px; margin-bottom: 4px; }
+  .manual-fields input {
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--cream);
+    padding: 10px 12px; font-family: var(--font-mono); font-size: 12.5px; outline: none;
+    border-radius: var(--radius-sm); transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .manual-fields input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(var(--gold-rgb),0.15); }
+  .manual-fields input::placeholder { color: var(--muted); }
   /* ===================== SHORT-VIEWPORT FALLBACK ===================== */
   @media (max-height: 640px) {
     .wrap { padding: 10px 24px 8px; }
@@ -1530,7 +1538,7 @@ function renderView(code) {
 function renderFormView(code, editId) {
   const card = document.getElementById('modal-card');
   const existing = editId ? getMovies(code).find(m => m.id === editId) : null;
-  const movie = existing || { title: '' };
+  const movie = existing || { title: '', year: '', director: '', posterUrl: '' };
   window.pendingExtra = { year: movie.year || '', director: movie.director || '', posterUrl: movie.posterUrl || '' };
   currentEditId = editId || null;
 
@@ -1539,6 +1547,11 @@ function renderFormView(code, editId) {
       '<div class="google-field"><span class="google-icon">' + ICON_FILM + '</span><input id="f-title" type="text" value="' + escapeAttr(movie.title) + '" placeholder="Type a film title…" required autocomplete="off" oninput="onTitleInput()" onkeydown="handleTitleKeydown(event)"></div>' +
       '<div id="suggest-dropdown" class="suggest-dropdown" style="display:none;"></div>' +
     '</div>';
+
+  // Manual fields cover films search can't find (obscure, personal, or fan-made) — auto-expanded
+  // if this entry already has any of this data (e.g. editing something added manually before).
+  const manualPosterVal = (movie.posterUrl && !movie.posterUrl.startsWith('data:')) ? movie.posterUrl : '';
+  const hasManualData = !!(movie.year || movie.director || manualPosterVal);
 
   let html = '<form class="edit-form" onsubmit="return saveMovie(event, \'' + code + '\', ' + (editId ? '\'' + editId + '\'' : 'null') + ')">';
   html += modalHeader(code, fieldWrapHtml);
@@ -1550,6 +1563,12 @@ function renderFormView(code, editId) {
   html += '<div id="captured-line" class="captured-line"></div>';
   html += '<div id="dup-warning" class="dup-warning"></div>';
   html += '<div id="surprise-status" class="surprise-status"></div>';
+  html += '<span class="back-link" id="manual-toggle" onclick="toggleManualFields()" style="display:' + (hasManualData ? 'none' : 'inline-block') + ';">+ Can\u2019t find it? Add details manually</span>';
+  html += '<div id="manual-fields" class="manual-fields" style="display:' + (hasManualData ? 'flex' : 'none') + ';">';
+  html += '<input id="f-year-manual" type="text" value="' + escapeAttr(movie.year || '') + '" placeholder="Year (e.g. 1998)" oninput="onManualFieldInput()">';
+  html += '<input id="f-director-manual" type="text" value="' + escapeAttr(movie.director || '') + '" placeholder="Director (optional)" oninput="onManualFieldInput()">';
+  html += '<input id="f-poster-manual" type="text" value="' + escapeAttr(manualPosterVal) + '" placeholder="Poster image URL (optional)" oninput="onManualFieldInput()">';
+  html += '</div>';
   html += '<div class="form-actions"><button type="submit" class="save">' + (editId ? 'Save changes' : 'Add film') + '</button>';
   html += '<button type="button" id="surprise-btn" class="cancel" onclick="suggestRandomFilmForCode(\'' + code + '\')">🎲 Surprise Again</button></div>';
   if (editId) {
@@ -1562,6 +1581,39 @@ function renderFormView(code, editId) {
   document.getElementById('f-title').focus();
   updateCapturedLine();
   updateDupWarning(code, editId);
+}
+
+function toggleManualFields() {
+  const fields = document.getElementById('manual-fields');
+  const toggle = document.getElementById('manual-toggle');
+  if (!fields) return;
+  const opening = fields.style.display === 'none';
+  fields.style.display = opening ? 'flex' : 'none';
+  if (toggle) toggle.style.display = opening ? 'none' : 'inline-block';
+  if (opening) document.getElementById('f-year-manual').focus();
+}
+
+// Manual entry always wins over whatever a search/suggestion previously set — someone filling
+// these in is deliberately overriding or supplying data search couldn't find.
+function onManualFieldInput() {
+  const year = document.getElementById('f-year-manual').value.trim();
+  const director = document.getElementById('f-director-manual').value.trim();
+  const posterUrl = document.getElementById('f-poster-manual').value.trim();
+  window.pendingExtra = { year, director, posterUrl };
+
+  const preview = document.getElementById('poster-preview');
+  if (preview) {
+    if (posterUrl) {
+      preview.src = posterUrl;
+      preview.style.display = 'block';
+      preview.onerror = () => { preview.style.display = 'none'; };
+    } else {
+      preview.style.display = 'none';
+      preview.removeAttribute('src');
+    }
+  }
+  updateCapturedLine();
+  updateDupWarning(currentCode, currentEditId);
 }
 
 // Checks whether the current title matches a film already saved to a different country —
@@ -1725,8 +1777,16 @@ function handleTitleKeydown(e) {
 }
 
 function onTitleInput() {
-  // Any manual edit invalidates a previously picked suggestion's year/director/poster.
+  // Any manual edit invalidates a previously picked suggestion's (or manually entered) year/director/poster.
   window.pendingExtra = { year: '', director: '', posterUrl: '' };
+  const yearManual = document.getElementById('f-year-manual');
+  const directorManual = document.getElementById('f-director-manual');
+  const posterManual = document.getElementById('f-poster-manual');
+  if (yearManual) yearManual.value = '';
+  if (directorManual) directorManual.value = '';
+  if (posterManual) posterManual.value = '';
+  const preview = document.getElementById('poster-preview');
+  if (preview) { preview.style.display = 'none'; preview.removeAttribute('src'); }
   updateCapturedLine();
   updateDupWarning(currentCode, currentEditId);
   const dropdown = document.getElementById('suggest-dropdown');
@@ -2403,5 +2463,3 @@ async function checkFirstVisit() {
 </script>
 </body>
 </html>
-
-
