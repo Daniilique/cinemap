@@ -333,6 +333,9 @@
   }
   .btn-primary { background: var(--gold); color:#fff; border:none; }
   .btn-primary:hover { background: var(--gold-dim); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); box-shadow: none; }
+  .btn-secondary:hover { color: var(--cream); }
+  .surprise-status { font-size: 10.5px; color: var(--muted); text-align:center; min-height: 13px; margin: -4px 0 4px; }
 
   /* --- Per-country movie list: multiple films, one starred as the favorite --- */
   .movie-list-label { font-size: 10.5px; color: var(--muted); text-align:center; margin: 16px 0 8px; }
@@ -1162,6 +1165,79 @@ function looksLikeFilmPage(summary, lang) {
 // poster embedded on save. countryName biases results toward films actually associated with the
 // country being edited. Typing in Russian or Japanese automatically searches the matching
 // Wikipedia edition instead, since OMDb's titles are almost all Latin-script/English.
+// Picks a random film genuinely tagged with the given country in the local database.
+// Remembers the last title shown so a reroll doesn't just repeat it when there's another option.
+let lastSurpriseTitle = null;
+
+function pickRandomLocalFilm(countryName) {
+  const pool = MOVIE_DB.filter(row => (row.countries || []).some(c => countryStringsMatch(c, countryName)));
+  if (!pool.length) return null;
+  let candidates = pool;
+  if (lastSurpriseTitle && pool.length > 1) {
+    const filtered = pool.filter(row => row.title !== lastSurpriseTitle);
+    if (filtered.length) candidates = filtered;
+  }
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+// Picks one real film associated with the given country. Local database first (instant, and
+// genuinely verified since it's real TMDb country data) — falls back to the older
+// Wikipedia-search approach only if the local database isn't loaded or has no match for this
+// country at all.
+async function suggestRandomFilm(countryName) {
+  const localRow = MOVIE_DB.length ? pickRandomLocalFilm(countryName) : null;
+  if (localRow) {
+    lastSurpriseTitle = localRow.title;
+    const base = { title: localRow.title, year: localRow.year || '', director: '', posterUrl: '' };
+    const key = await getOmdbKey();
+    if (key) {
+      try {
+        const detail = await omdbFetchByTitle(localRow.title, key);
+        const fromOmdb = await omdbDetailToResult(detail, true);
+        return { ...base, director: fromOmdb.director, posterUrl: fromOmdb.posterUrl };
+      } catch (e) { /* fall through to Wikipedia below */ }
+    }
+    try {
+      const hits = await wikiSearch(localRow.title + ' ' + (localRow.year || '') + ' film', 1);
+      if (hits.length) {
+        const summary = await wikiSummary(hits[0].title);
+        const fromWiki = await wikiSummaryToResult(hits[0].title, summary, true);
+        return { ...base, director: fromWiki.director, posterUrl: fromWiki.posterUrl };
+      }
+    } catch (e) { /* no poster available — still a perfectly good, verified pick */ }
+    return base;
+  }
+
+  // Local database unavailable or has nothing for this country — fall back to the original
+  // Wikipedia-search approach (checks candidates actually look like film pages before picking).
+  const hits = await wikiSearch(countryName + ' film', 12);
+  if (!hits.length) throw new Error('No suggestions found for ' + countryName);
+  const settled = await Promise.allSettled(hits.map(h => wikiSummary(h.title)));
+  const filmCandidates = hits
+    .map((h, i) => ({ hit: h, summary: settled[i].status === 'fulfilled' ? settled[i].value : null }))
+    .filter(c => c.summary && looksLikeFilmPage(c.summary));
+  const pool = filmCandidates.length ? filmCandidates : hits.map((h, i) => ({
+    hit: h, summary: settled[i].status === 'fulfilled' ? settled[i].value : null
+  }));
+  let candidates = pool;
+  if (lastSurpriseTitle && pool.length > 1) {
+    const filtered = pool.filter(c => c.hit.title !== lastSurpriseTitle);
+    if (filtered.length) candidates = filtered;
+  }
+  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+  lastSurpriseTitle = chosen.hit.title;
+  const cleanTitle = chosen.hit.title.replace(/\s*\(.*film.*\)$/i, '');
+  const key = await getOmdbKey();
+  if (key) {
+    try {
+      const detail = await omdbFetchByTitle(cleanTitle, key);
+      return await omdbDetailToResult(detail, true);
+    } catch (e) { /* fall through to the Wikipedia summary already in hand */ }
+  }
+  const summary = chosen.summary || await wikiSummary(chosen.hit.title);
+  return wikiSummaryToResult(chosen.hit.title, summary, true);
+}
+
 async function searchFilmSuggestions(query, countryName) {
   const lang = detectQueryLang(query);
 
@@ -1169,21 +1245,29 @@ async function searchFilmSuggestions(query, countryName) {
     const localResults = searchLocalMovieDb(query, countryName, 4);
     if (localResults.length) {
       const key = await getOmdbKey();
-      if (key) {
-        // Backfill poster/director from OMDb using the now-exact title — a single precise
-        // lookup per result rather than a fuzzy text search, since we already know the real title.
-        const enriched = await Promise.allSettled(localResults.map(async r => {
+      // Backfill poster/director for each match. OMDb (if a key is set) gets a single precise
+      // lookup by the now-exact title. Otherwise fall back to Wikipedia — which still gives a
+      // real poster with no key needed, same as it did before the local database existed; without
+      // this fallback, results from the local DB (which has no posters of its own) would show none.
+      const enriched = await Promise.allSettled(localResults.map(async r => {
+        if (key) {
           try {
             const detail = await omdbFetchByTitle(r.title, key);
             const fromOmdb = await omdbDetailToResult(detail, false);
             return { ...r, director: fromOmdb.director, posterUrl: fromOmdb.posterUrl };
-          } catch (e) {
-            return r; // OMDb had nothing for this exact title — keep the local result as-is
+          } catch (e) { /* OMDb had nothing for this exact title — try Wikipedia below */ }
+        }
+        try {
+          const hits = await wikiSearch(r.title + ' ' + r.year + ' film', 1);
+          if (hits.length) {
+            const summary = await wikiSummary(hits[0].title);
+            const fromWiki = await wikiSummaryToResult(hits[0].title, summary, false);
+            return { ...r, director: r.director || fromWiki.director, posterUrl: fromWiki.posterUrl };
           }
-        }));
-        return enriched.map(s => s.status === 'fulfilled' ? s.value : null).filter(Boolean);
-      }
-      return localResults;
+        } catch (e) { /* no luck either — keep the local result as-is, still has verified country data */ }
+        return r;
+      }));
+      return enriched.map(s => s.status === 'fulfilled' ? s.value : null).filter(Boolean);
     }
   }
 
@@ -1406,7 +1490,8 @@ function renderView(code) {
   if (!movies.length) {
     html += '<div class="poster-placeholder">' + ICON_FILM + '</div>';
     html += '<p class="empty-msg">No film added yet for ' + escapeHtml(name) + '.</p>';
-    html += '<div class="btn-row"><button class="btn-primary" onclick="renderFormView(\'' + code + '\')">Add film</button></div>';
+    html += '<div class="btn-row"><button class="btn-primary" onclick="renderFormView(\'' + code + '\')">Add film</button>';
+    html += '<button class="btn-secondary" onclick="renderFormView(\'' + code + '\'); suggestRandomFilmForCode(\'' + code + '\')">🎲 Surprise me</button></div>';
   } else {
     if (fav.posterUrl) {
       html += '<img class="poster-display" src="' + escapeAttr(fav.posterUrl) + '" alt="' + escapeAttr(fav.title) + '" onerror="this.outerHTML=\'<div class=&quot;poster-placeholder&quot;>🎬</div>\'">';
@@ -1464,8 +1549,9 @@ function renderFormView(code, editId) {
   html += '<img id="poster-preview" class="poster-preview"' + (movie.posterUrl ? ' src="' + escapeAttr(movie.posterUrl) + '" style="display:block;"' : ' style="display:none;"') + ' onerror="this.style.display=\'none\'">';
   html += '<div id="captured-line" class="captured-line"></div>';
   html += '<div id="dup-warning" class="dup-warning"></div>';
+  html += '<div id="surprise-status" class="surprise-status"></div>';
   html += '<div class="form-actions"><button type="submit" class="save">' + (editId ? 'Save changes' : 'Add film') + '</button>';
-  html += '<button type="button" class="cancel" onclick="' + (getMovies(code).length ? 'renderView(\'' + code + '\')' : 'closeModal()') + '">Cancel</button></div>';
+  html += '<button type="button" id="surprise-btn" class="cancel" onclick="suggestRandomFilmForCode(\'' + code + '\')">🎲 Surprise Again</button></div>';
   if (editId) {
     html += '<button type="button" class="row-remove-full" onclick="removeMovie(\'' + code + '\', \'' + editId + '\')">Remove this pick</button>';
   }
@@ -1513,6 +1599,30 @@ function updateDupWarning(code, editId) {
   } else {
     el.textContent = '';
     el.style.display = 'none';
+  }
+}
+
+async function suggestRandomFilmForCode(code) {
+  const btn = document.getElementById('surprise-btn');
+  const status = document.getElementById('surprise-status');
+  const dropdown = document.getElementById('suggest-dropdown');
+  if (dropdown) dropdown.style.display = 'none';
+  const countryName = COUNTRY_NAMES[code] || code;
+  if (btn) { btn.disabled = true; btn.textContent = '🎲 Picking…'; }
+  if (status) status.textContent = 'Looking for a film from ' + countryName + '…';
+  try {
+    const result = await suggestRandomFilm(countryName);
+    const titleInput = document.getElementById('f-title');
+    if (titleInput) titleInput.value = result.title;
+    window.pendingExtra = { year: result.year || '', director: result.director || '', posterUrl: result.posterUrl || '' };
+    updateCapturedLine();
+    updateDupWarning(code, currentEditId);
+    if (status) status.textContent = '';
+  } catch (e) {
+    console.error('suggestRandomFilm failed', e);
+    if (status) status.textContent = 'Live suggestions need a regular browser tab — type a title by hand instead.';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🎲 Surprise Again'; }
   }
 }
 
@@ -2293,4 +2403,3 @@ async function checkFirstVisit() {
 </script>
 </body>
 </html>
-
