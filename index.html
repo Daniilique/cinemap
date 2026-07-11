@@ -924,6 +924,7 @@ let overrides = {};
 let removed = {};
 let currentCode = null;
 let currentEditId = null; // which specific movie entry is open in the form, if editing (vs. adding new)
+let MOVIE_DB = []; // populated by loadMovieDatabase(); each row is {tmdb_id, title, year, countries}
 
 /* ---------------- Storage: window.storage when available, localStorage otherwise ---------------- */
 
@@ -1035,6 +1036,15 @@ async function omdbSearchTitles(query, key) {
 
 async function omdbFetchByImdbId(imdbID, key) {
   const url = 'https://www.omdbapi.com/?apikey=' + encodeURIComponent(key) + '&i=' + encodeURIComponent(imdbID) + '&plot=short';
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('OMDb request failed (' + res.status + ')');
+  const data = await res.json();
+  if (data.Response === 'False') throw new Error(data.Error || 'Not found');
+  return data;
+}
+
+async function omdbFetchByTitle(title, key) {
+  const url = 'https://www.omdbapi.com/?apikey=' + encodeURIComponent(key) + '&t=' + encodeURIComponent(title) + '&plot=short';
   const res = await fetch(url);
   if (!res.ok) throw new Error('OMDb request failed (' + res.status + ')');
   const data = await res.json();
@@ -1154,6 +1164,28 @@ function looksLikeFilmPage(summary, lang) {
 // Wikipedia edition instead, since OMDb's titles are almost all Latin-script/English.
 async function searchFilmSuggestions(query, countryName) {
   const lang = detectQueryLang(query);
+
+  if (lang === 'en' && MOVIE_DB.length) {
+    const localResults = searchLocalMovieDb(query, countryName, 4);
+    if (localResults.length) {
+      const key = await getOmdbKey();
+      if (key) {
+        // Backfill poster/director from OMDb using the now-exact title — a single precise
+        // lookup per result rather than a fuzzy text search, since we already know the real title.
+        const enriched = await Promise.allSettled(localResults.map(async r => {
+          try {
+            const detail = await omdbFetchByTitle(r.title, key);
+            const fromOmdb = await omdbDetailToResult(detail, false);
+            return { ...r, director: fromOmdb.director, posterUrl: fromOmdb.posterUrl };
+          } catch (e) {
+            return r; // OMDb had nothing for this exact title — keep the local result as-is
+          }
+        }));
+        return enriched.map(s => s.status === 'fulfilled' ? s.value : null).filter(Boolean);
+      }
+      return localResults;
+    }
+  }
 
   if (lang === 'en') {
     const key = await getOmdbKey();
@@ -2148,6 +2180,80 @@ async function loadTheme() {
   applyTheme(saved === 'dark' ? 'dark' : 'light'); // light is the default whenever nothing is saved
 }
 
+// Fetches and decompresses the local movie database (movies.jsonl.gz) once, so search and
+// country-verification can run instantly against 250k real titles with no network round-trip
+// and no OMDb rate limit. Falls back gracefully (MOVIE_DB stays empty) if the file isn't hosted
+// alongside index.html, or if the browser can't decompress gzip client-side (older browsers).
+async function loadMovieDatabase() {
+  try {
+    const res = await fetch('movies.jsonl.gz');
+    if (!res.ok) throw new Error('movies.jsonl.gz not found (' + res.status + ')');
+    if (typeof DecompressionStream === 'undefined' || !res.body) {
+      throw new Error('This browser can\u2019t decompress gzip client-side');
+    }
+    const decompressed = res.body.pipeThrough(new DecompressionStream('gzip'));
+    const text = await new Response(decompressed).text();
+    const db = [];
+    for (const line of text.split('\n')) {
+      const t = line.trim();
+      if (!t) continue;
+      try { db.push(JSON.parse(t)); } catch (e) { /* skip a malformed line */ }
+    }
+    MOVIE_DB = db;
+    console.log('Local movie database loaded:', MOVIE_DB.length, 'titles');
+  } catch (e) {
+    console.warn('Local movie database unavailable — falling back to live search only.', e);
+    MOVIE_DB = [];
+  }
+}
+
+// A TMDb country string ("United States of America") and our own country name ("United States")
+// rarely match exactly, so this checks substring inclusion in both directions — covers most real
+// cases (longer official names containing the shorter common name, or vice versa) without needing
+// a full alias table for every country-naming discrepancy.
+function countryStringsMatch(a, b) {
+  if (!a || !b) return false;
+  const x = a.toLowerCase(), y = b.toLowerCase();
+  return x.includes(y) || y.includes(x);
+}
+
+// Searches the local database: exact title matches first, then prefix matches, then
+// anywhere-in-title matches — each tier preserves the file's original order (roughly popularity),
+// then results are re-sorted so any tier's country-verified matches float to the top.
+function searchLocalMovieDb(query, countryName, limit) {
+  limit = limit || 6;
+  const q = query.trim().toLowerCase();
+  if (!q || !MOVIE_DB.length) return [];
+
+  const exact = [], prefix = [], substr = [];
+  const wantMore = limit * 15; // enough candidates for country-sorting to have room to work with
+  for (const row of MOVIE_DB) {
+    const t = (row.title || '').toLowerCase();
+    if (t === q) exact.push(row);
+    else if (t.startsWith(q)) prefix.push(row);
+    else if (t.includes(q)) substr.push(row);
+    if (exact.length + prefix.length + substr.length >= wantMore) break;
+  }
+
+  let candidates = exact.concat(prefix, substr);
+  if (countryName) {
+    candidates.sort((a, b) => {
+      const aMatch = (a.countries || []).some(c => countryStringsMatch(c, countryName)) ? 1 : 0;
+      const bMatch = (b.countries || []).some(c => countryStringsMatch(c, countryName)) ? 1 : 0;
+      return bMatch - aMatch;
+    });
+  }
+
+  return candidates.slice(0, limit).map(row => ({
+    title: row.title,
+    year: row.year || '',
+    director: '', // not in this dataset — backfilled from OMDb when a result is picked or enriched
+    posterUrl: '',
+    countryField: (row.countries || []).join(', '),
+    tmdbId: row.tmdb_id
+  }));
+}
+
 async function loadOverrides() {
   try {
     const keys = await storageListKeys('movie:');
@@ -2182,8 +2288,8 @@ async function checkFirstVisit() {
   paintMap();
   await updateKeyStatus();
   await checkFirstVisit();
+  loadMovieDatabase(); // not awaited — loads in the background, search falls back gracefully until it's ready
 })();
 </script>
 </body>
 </html>
-
