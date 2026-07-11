@@ -265,9 +265,9 @@
   }
   .modal-overlay.open { opacity: 1; pointer-events:auto; }
   .modal-card {
-    width: min(94vw, 580px); max-height: 97vh; overflow-y:auto; overflow-x:hidden;
+    width: min(94vw, 580px); min-height: 480px; max-height: 97vh; overflow-y:auto; overflow-x:hidden;
     background: var(--surface);
-    border: none; padding: 0;
+    border: none; padding: 0; display: flex; flex-direction: column;
     border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
     transform: scale(.97) translateY(6px); transition: transform .18s ease;
   }
@@ -295,7 +295,7 @@
     padding: 30px 34px 14px; margin-bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
   .modal-head-row { display:flex; align-items:flex-start; justify-content:space-between; }
-  .modal-body { padding: 0 34px 30px; }
+  .modal-body { padding: 0 34px 30px; flex: 1; display: flex; flex-direction: column; }
   .modal-head .flag { font-size: 34px; line-height:1; }
   .modal-head .country-name {
     font-family: var(--font-display);
@@ -326,7 +326,7 @@
   .empty-msg { color: var(--muted); font-size: 13px; line-height:1.6; text-align:center; margin: 6px 0 4px; }
 
   /* --- Add-film button (view mode) --- */
-  .btn-row { display:flex; gap:8px; margin-top: 16px; }
+  .btn-row { display:flex; gap:8px; margin-top: auto; padding-top: 16px; }
   .btn-row button {
     flex:1; font-family: var(--font-mono); font-size: 11px; letter-spacing:.1em; text-transform:uppercase; font-weight: 600;
     padding: 12px; cursor:pointer; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); transition: all .15s ease;
@@ -365,7 +365,7 @@
 
   /* ---------- Add / edit form: single Google-style field with autocomplete dropdown ---------- */
   /* ===================== ADD/EDIT FORM: single search field + suggestions ===================== */
-  form.edit-form { display:flex; flex-direction:column; gap:14px; margin-top: 10px; }
+  form.edit-form { display:flex; flex-direction:column; gap:14px; margin-top: 10px; flex: 1; }
   .field-wrap { position: relative; margin-top: 14px; }
   .google-field {
     display:flex; align-items:center; gap:10px;
@@ -407,7 +407,7 @@
     margin: 2px 0 0; padding: 9px 12px; background: var(--gold); font-weight: 600; letter-spacing: .01em;
     border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
   }
-  .form-actions { display:flex; gap:8px; margin-top: 2px; }
+  .form-actions { display:flex; gap:8px; margin-top: auto; padding-top: 8px; }
   .form-actions button { flex:1; font-family: var(--font-mono); font-size: 11px; letter-spacing:.1em; text-transform:uppercase; font-weight: 600; padding: 12px; cursor:pointer; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); transition: all .15s ease; }
   .form-actions .save { background: var(--gold); color:#fff; border:none; }
   .form-actions .save:hover { background: var(--gold-dim); box-shadow: var(--shadow-md); transform: translateY(-1px); }
@@ -1055,20 +1055,34 @@ async function omdbDetailToResult(detail, embedPoster) {
 }
 
 // Detects which Wikipedia edition to search based on the script used in what was typed.
-// Cyrillic and Japanese are unambiguous from the characters alone. Spanish shares the Latin
-// alphabet with English, so it's only detected when accented/Spanish-specific characters are
-// present (plain unaccented Spanish words are indistinguishable from English and just fall
-// through to the English/OMDb path, which is fine).
+// Cyrillic, Japanese, and each Indian script are unambiguous from the characters alone. Spanish
+// shares the Latin alphabet with English, so it's only detected when accented/Spanish-specific
+// characters are present (plain unaccented Spanish words are indistinguishable from English and
+// just fall through to the English/OMDb path, which is fine).
 function detectQueryLang(query) {
   if (/[\u3040-\u30ff\u31f0-\u31ff\uff66-\uff9f\u4e00-\u9fff]/.test(query)) return 'ja';
   if (/[\u0400-\u04FF]/.test(query)) return 'ru';
+  // Indian scripts — Devanagari covers Hindi/Marathi/Nepali; since script alone can't tell those
+  // apart, it defaults to Hindi Wikipedia (the largest edition using that script).
+  if (/[\u0900-\u097F]/.test(query)) return 'hi';
+  if (/[\u0980-\u09FF]/.test(query)) return 'bn'; // Bengali
+  if (/[\u0A00-\u0A7F]/.test(query)) return 'pa'; // Punjabi (Gurmukhi)
+  if (/[\u0A80-\u0AFF]/.test(query)) return 'gu'; // Gujarati
+  if (/[\u0B80-\u0BFF]/.test(query)) return 'ta'; // Tamil
+  if (/[\u0C00-\u0C7F]/.test(query)) return 'te'; // Telugu
+  if (/[\u0C80-\u0CFF]/.test(query)) return 'kn'; // Kannada
+  if (/[\u0D00-\u0D7F]/.test(query)) return 'ml'; // Malayalam
   if (/[ñÑáéíóúüÁÉÍÓÚÜ¿¡]/.test(query)) return 'es';
   return 'en';
 }
 
 // The word for "film"/"movie" in each supported language, used both to bias the search query
 // and to confirm a result actually looks like a film page (see looksLikeFilmPage).
-const FILM_WORD = { en: 'film', ru: 'фильм', ja: '映画', es: 'película' };
+const FILM_WORD = {
+  en: 'film', ru: 'фильм', ja: '映画', es: 'película',
+  hi: 'फ़िल्म', bn: 'চলচ্চিত্র', pa: 'ਫਿਲਮ', gu: 'ફિલ્મ',
+  ta: 'திரைப்படம்', te: 'సినిమా', kn: 'ಚಿತ್ರ', ml: 'സിനിമ'
+};
 
 async function wikiSearch(query, limit, lang) {
   lang = lang || 'en';
@@ -1580,7 +1594,11 @@ function onTitleInput() {
   if (query.length < 2) { dropdown.style.display = 'none'; dropdown.innerHTML = ''; return; }
   dropdown.style.display = 'block';
   const lang = detectQueryLang(query);
-  const langLabel = { ru: 'Russian Wikipedia', ja: 'Japanese Wikipedia', es: 'Spanish Wikipedia' }[lang];
+  const langLabel = {
+    ru: 'Russian Wikipedia', ja: 'Japanese Wikipedia', es: 'Spanish Wikipedia',
+    hi: 'Hindi Wikipedia', bn: 'Bengali Wikipedia', pa: 'Punjabi Wikipedia', gu: 'Gujarati Wikipedia',
+    ta: 'Tamil Wikipedia', te: 'Telugu Wikipedia', kn: 'Kannada Wikipedia', ml: 'Malayalam Wikipedia'
+  }[lang];
   dropdown.innerHTML = '<div class="suggest-status">Searching' + (langLabel ? ' ' + langLabel : '') + '…</div>';
   const myRequestId = ++suggestRequestId;
   suggestDebounceTimer = setTimeout(() => runSuggestSearch(query, myRequestId), 450);
