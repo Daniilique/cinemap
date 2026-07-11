@@ -436,6 +436,22 @@
     .key-row { display: none; }
     .map-card { margin-top: 8px; }
   }
+  /* ===================== NARROW-SCREEN (PHONE) FALLBACK ===================== */
+  @media (max-width: 480px) {
+    .wrap { padding: 14px 14px 10px; }
+    /* Reserve room so the absolutely-positioned theme switch never overlaps the title text */
+    header.top { padding-right: 78px; }
+    h1 { font-size: clamp(24px, 8vw, 36px); }
+    .theme-switch { width: 70px; height: 28px; }
+    .theme-switch-knob { width: 32px; height: 22px; }
+    html.theme-dark .theme-switch-knob { transform: translateX(36px); }
+    .switch-icon { width: 35px; height: 28px; font-size: 9px; }
+    /* Let the Map/List/Export/Help row wrap to a second line instead of overflowing off-screen */
+    .view-toggle { flex-wrap: wrap; row-gap: 8px; }
+    .view-btn { padding: 7px 12px; font-size: 10px; }
+    .modal-head { padding: 24px 18px 12px; }
+    .modal-body { padding: 0 18px 22px; }
+  }
 </style>
 </head>
 <body>
