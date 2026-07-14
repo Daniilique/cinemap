@@ -1214,13 +1214,15 @@ async function suggestRandomFilm(countryName) {
   const localRow = MOVIE_DB.length ? pickRandomLocalFilm(countryName) : null;
   if (localRow) {
     lastSurpriseTitle = localRow.title;
-    const base = { title: localRow.title, year: localRow.year || '', director: '', posterUrl: '' };
+    const localPoster = localRow.poster_path ? ('https://image.tmdb.org/t/p/w342' + localRow.poster_path) : '';
+    const base = { title: localRow.title, year: localRow.year || '', director: '', posterUrl: localPoster };
+    const needsPoster = !localPoster;
     const key = await getOmdbKey();
     if (key) {
       try {
         const detail = await omdbFetchByTitle(localRow.title, key);
         const fromOmdb = await omdbDetailToResult(detail, true);
-        return { ...base, director: fromOmdb.director, posterUrl: fromOmdb.posterUrl };
+        return { ...base, director: fromOmdb.director, posterUrl: needsPoster ? fromOmdb.posterUrl : base.posterUrl };
       } catch (e) { /* fall through to Wikipedia below */ }
     }
     try {
@@ -1228,7 +1230,7 @@ async function suggestRandomFilm(countryName) {
       if (hits.length) {
         const summary = await wikiSummary(hits[0].title);
         const fromWiki = await wikiSummaryToResult(hits[0].title, summary, true);
-        return { ...base, director: fromWiki.director, posterUrl: fromWiki.posterUrl };
+        return { ...base, director: fromWiki.director, posterUrl: needsPoster ? fromWiki.posterUrl : base.posterUrl };
       }
     } catch (e) { /* no poster available — still a perfectly good, verified pick */ }
     return base;
@@ -1271,16 +1273,17 @@ async function searchFilmSuggestions(query, countryName) {
     const localResults = searchLocalMovieDb(query, countryName, 4);
     if (localResults.length) {
       const key = await getOmdbKey();
-      // Backfill poster/director for each match. OMDb (if a key is set) gets a single precise
-      // lookup by the now-exact title. Otherwise fall back to Wikipedia — which still gives a
-      // real poster with no key needed, same as it did before the local database existed; without
-      // this fallback, results from the local DB (which has no posters of its own) would show none.
+      // Director always needs backfilling (not in this dataset). Poster only needs backfilling
+      // for the minority of rows with no TMDB poster_path — anything that already has one is
+      // exact and verified for this specific film, so there's no reason to risk swapping it for
+      // a fuzzy OMDb/Wikipedia title-search result that could grab a different film's poster.
       const enriched = await Promise.allSettled(localResults.map(async r => {
+        const needsPoster = !r.posterUrl;
         if (key) {
           try {
             const detail = await omdbFetchByTitle(r.title, key);
             const fromOmdb = await omdbDetailToResult(detail, false);
-            return { ...r, director: fromOmdb.director, posterUrl: fromOmdb.posterUrl };
+            return { ...r, director: fromOmdb.director, posterUrl: needsPoster ? fromOmdb.posterUrl : r.posterUrl };
           } catch (e) { /* OMDb had nothing for this exact title — try Wikipedia below */ }
         }
         try {
@@ -1288,7 +1291,7 @@ async function searchFilmSuggestions(query, countryName) {
           if (hits.length) {
             const summary = await wikiSummary(hits[0].title);
             const fromWiki = await wikiSummaryToResult(hits[0].title, summary, false);
-            return { ...r, director: r.director || fromWiki.director, posterUrl: fromWiki.posterUrl };
+            return { ...r, director: r.director || fromWiki.director, posterUrl: needsPoster ? fromWiki.posterUrl : r.posterUrl };
           }
         } catch (e) { /* no luck either — keep the local result as-is, still has verified country data */ }
         return r;
@@ -2435,8 +2438,10 @@ function searchLocalMovieDb(query, countryName, limit) {
   return candidates.slice(0, limit).map(row => ({
     title: row.title,
     year: row.year || '',
-    director: '', // not in this dataset — backfilled from OMDb when a result is picked or enriched
-    posterUrl: '',
+    director: '', // not in this dataset — backfilled from OMDb/Wikipedia when a result is picked
+    // TMDB's own poster for this exact tmdb_id — no title-matching ambiguity at all, unlike an
+    // OMDb/Wikipedia text search which could grab a different film's poster by mistake.
+    posterUrl: row.poster_path ? ('https://image.tmdb.org/t/p/w342' + row.poster_path) : '',
     countryField: (row.countries || []).join(', '),
     tmdbId: row.tmdb_id
   }));
