@@ -1338,6 +1338,19 @@ async function searchFilmSuggestions(query, countryName) {
 
 function flagEmoji(code) {
   if (!code || code.length !== 2) return '🎬';
+  // Belarus is special-cased: the standard flag emoji always renders the current official
+  // state flag (red/green), but this project deliberately uses the historical white-red-white
+  // flag instead — the one associated with the Belarusian pro-democracy opposition — so it's
+  // drawn as a small inline SVG rather than relying on the OS's emoji font.
+  if (code.toLowerCase() === 'by') {
+    return '<svg viewBox="0 0 3 2" width="1.3em" height="0.87em" style="vertical-align:-0.15em;" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#ffffff"/><rect y="0.667" width="3" height="0.667" fill="#d22730"/></svg>';
+  }
+  // Russia is special-cased the same way: the standard flag emoji renders the official tricolor,
+  // but this project deliberately uses the White-Blue-White flag instead — adopted by the Russian
+  // anti-war/opposition movement since 2022, replacing the red stripe with white.
+  if (code.toLowerCase() === 'ru') {
+    return '<svg viewBox="0 0 3 2" width="1.3em" height="0.87em" style="vertical-align:-0.15em;" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#ffffff"/><rect y="0.667" width="3" height="0.667" fill="#0072ce"/></svg>';
+  }
   const cc = code.toUpperCase();
   try { return String.fromCodePoint(...[...cc].map(c => 127397 + c.charCodeAt(0))); }
   catch (e) { return '🎬'; }
